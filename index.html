@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的知识主页</title>
+    <meta name="description" content="AI未来就业与量子AI研究个人知识主页">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #1a202c;
+            --secondary: #3182ce;
+            --accent: #6366f1;
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --light: #f7fafc;
+            --dark: #2d3748;
+            --text-color: #333;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            --transition: all 0.3s ease;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f9f9f9;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .nav-container {
+            background: white;
+            box-shadow: var(--box-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 70px;
+        }
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: var(--primary-color);
+            font-weight: 500;
+            font-size: 1.1rem;
+            transition: color 0.3s;
+            position: relative;
+            padding: 0.5rem 0;
+        }
+        .nav-links a:hover {
+            color: var(--secondary-color);
+        }
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--secondary-color);
+            transition: width 0.3s;
+        }
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            flex: 1;
+        }
+        header.hero {
+            background: linear-gradient(135deg, var(--primary), var(--secondary-color));
+            color: white;
+            text-align: center;
+            padding: 80px 0 40px;
+            position: relative;
+            overflow: hidden;
+        }
+        header.hero::after {
+            content: '';
+            position: absolute;
+            bottom: -40px;
+            left: 0;
+            right: 0;
+            height: 80px;
+            background: #f9f9f9;
+            border-radius: 50% 50% 0 0;
+        }
+        header.hero h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        header.hero p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+            position: relative;
+            z-index: 1;
+        }
+        .main-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 40px;
+            margin: 40px 0 60px;
+        }
+        .card {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            padding: 2rem 1.5rem 1.5rem 1.5rem;
+            transition: var(--transition);
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            min-height: 260px;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(49,130,206,0.10);
+        }
+        .card-title {
+            font-size: 1.3rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+        .card-title i {
+            margin-right: 10px;
+            color: var(--secondary-color);
+        }
+        .card-desc {
+            font-size: 1rem;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+        }
+        .card-link {
+            margin-top: auto;
+            display: inline-block;
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.6rem 1.4rem;
+            border-radius: 24px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: background 0.2s, transform 0.2s;
+        }
+        .card-link:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        footer {
+            background: var(--primary-color);
+            color: white;
+            padding: 2rem 0 1rem 0;
+            margin-top: 40px;
+        }
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+        .footer-col {
+            flex: 1;
+            min-width: 200px;
+        }
+        .footer-col h3 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+        .footer-col ul {
+            list-style: none;
+        }
+        .footer-col li {
+            margin-bottom: 0.5rem;
+        }
+        .footer-col a {
+            color: rgba(255,255,255,0.8);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        .footer-col a:hover {
+            color: white;
+        }
+        .copyright {
+            text-align: center;
+            color: rgba(255,255,255,0.7);
+            margin-top: 2rem;
+            font-size: 0.95rem;
+        }
+        @media (max-width: 768px) {
+            header.hero h1 { font-size: 2rem; }
+            .main-cards { gap: 20px; }
+            .container { padding: 0 8px; }
+            nav { padding: 0 8px; }
+        }
+        @media (max-width: 480px) {
+            header.hero h1 { font-size: 1.3rem; }
+            .card { padding: 1.2rem 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="nav-container">
+        <nav>
+            <div class="logo"><i class="fas fa-home"></i> 我的知识主页</div>
+            <ul class="nav-links">
+                <li><a href="index.html">首页</a></li>
+                <li><a href="就业.html">AI未来就业分析</a></li>
+                <li><a href="研究报告.html">量子AI研究报告</a></li>
+            </ul>
+        </nav>
+    </div>
+    <header class="hero">
+        <h1>欢迎来到我的知识主页</h1>
+        <p>聚合AI未来就业与量子AI研究两大专题，持续更新个人学习与研究成果。</p>
+    </header>
+    <div class="container">
+        <div class="main-cards">
+            <div class="card">
+                <div class="card-title"><i class="fas fa-briefcase"></i> AI未来就业分析</div>
+                <div class="card-desc">
+                    深度剖析AI时代的就业趋势、岗位需求、能力构建与大学生职业发展路径，助力你把握未来机遇。
+                </div>
+                <a class="card-link" href="就业.html">进入专题 <i class="fas fa-arrow-right"></i></a>
+            </div>
+            <div class="card">
+                <div class="card-title"><i class="fas fa-atom"></i> 量子AI研究报告</div>
+                <div class="card-desc">
+                    聚焦量子计算与人工智能融合的前沿进展，涵盖技术基础、关键应用、发展趋势与产业生态全景解读。
+                </div>
+                <a class="card-link" href="研究报告.html">进入报告 <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <div class="footer-content">
+            <div class="footer-col">
+                <h3>关于本站</h3>
+                <p>本网站聚合AI就业与量子AI研究两大专题，旨在为学习者和研究者提供高质量的知识内容与分析。</p>
+            </div>
+            <div class="footer-col">
+                <h3>快速链接</h3>
+                <ul>
+                    <li><a href="就业.html">AI未来就业分析</a></li>
+                    <li><a href="研究报告.html">量子AI研究报告</a></li>
+                </ul>
+            </div>
+            <div class="footer-col">
+                <h3>联系方式</h3>
+                <ul>
+                    <li><a href="mailto:contact@example.com">contact@example.com</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            &copy; 2024 我的知识主页. 保留所有权利。
+        </div>
+    </footer>
+</body>
+</html>
