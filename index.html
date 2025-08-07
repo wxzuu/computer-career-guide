@@ -1,0 +1,2348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI未来就业形势与大学生职业发展全面分析</title>
+    <meta name="description" content="探索AI时代的职业机遇与挑战，助力大学生规划职业发展路径">
+    <meta name="keywords" content="AI就业,大学生职业发展,人工智能,职业规划">
+    
+    <!-- 预加载关键资源 -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/chart.js" as="script">
+    
+    <!-- 备用CDN -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          onerror="this.onerror=null;this.href='https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.4.0/css/all.min.css'">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" 
+            onerror="this.onerror=null;this.src='https://unpkg.com/chart.js@4.4.0/dist/chart.umd.js'"></script>
+    <style>
+        :root {
+            --primary: #1a202c;
+            --secondary: #3182ce;
+            --accent: #6366f1;
+            --light: #f7fafc;
+            --dark: #2d3748;
+            --gray: #718096;
+            --light-gray: #edf2f7;
+            --success: #38a169;
+            --warning: #ecc94b;
+            --danger: #e53e3e;
+        }
+        
+        /* 阅读进度条 */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 3px;
+            background: linear-gradient(90deg, var(--secondary), var(--accent));
+            z-index: 1001;
+            transition: width 0.3s ease;
+        }
+        
+        /* 加载状态 */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+            background: var(--light-gray);
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .loading::after {
+            content: '';
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--light-gray);
+            border-top: 4px solid var(--secondary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* 错误状态 */
+        .error-message {
+            background: rgba(229, 62, 62, 0.1);
+            border: 1px solid var(--danger);
+            color: var(--danger);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            margin: 1rem 0;
+        }
+        
+        /* 返回顶部按钮 */
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .back-to-top:hover {
+            background: var(--accent);
+            transform: translateY(-2px);
+        }
+        
+        /* 目录导航 */
+        .table-of-contents {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .toc-title {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary);
+        }
+        
+        .toc-list {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 0.5rem;
+        }
+        
+        .toc-list li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .toc-list a {
+            text-decoration: none;
+            color: var(--dark);
+            padding: 0.5rem;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            display: block;
+        }
+        
+        .toc-list a:hover {
+            background: var(--light-gray);
+            color: var(--secondary);
+        }
+        
+        /* 搜索功能 */
+        .search-container {
+            margin-bottom: 2rem;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 2px solid var(--light-gray);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: var(--secondary);
+        }
+        
+        /* 高亮搜索结果 */
+        .highlight-search {
+            background: yellow;
+            padding: 0.1rem 0.2rem;
+            border-radius: 2px;
+        }
+        
+        /* 打印样式 */
+        @media print {
+            .nav-container,
+            .back-to-top,
+            .search-container {
+                display: none !important;
+            }
+            
+            body {
+                padding-top: 0;
+            }
+            
+            .card {
+                break-inside: avoid;
+                box-shadow: none;
+                border: 1px solid #ccc;
+            }
+            
+            .chart-container {
+                page-break-inside: avoid;
+            }
+        }
+        
+        /* 可访问性改进 */
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        /* 焦点样式 */
+        a:focus,
+        button:focus,
+        input:focus {
+            outline: 2px solid var(--secondary);
+            outline-offset: 2px;
+        }
+        
+        /* 减少动画（用户偏好） */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark);
+            background-color: var(--light);
+            padding-top: 70px;
+        }
+        
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem 0;
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        header::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 30px;
+            background: linear-gradient(135deg, var(--primary) 25%, transparent 25%) -50px 0,
+                        linear-gradient(225deg, var(--primary) 25%, transparent 25%) -50px 0,
+                        linear-gradient(315deg, var(--primary) 25%, transparent 25%),
+                        linear-gradient(45deg, var(--primary) 25%, transparent 25%);
+            background-size: 100px 100px;
+            background-color: var(--light);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            margin: 2rem 0 1rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--light-gray);
+            padding-bottom: 0.5rem;
+        }
+        
+        h3 {
+            font-size: 1.5rem;
+            margin: 1.5rem 0 1rem;
+            color: var(--secondary);
+        }
+        
+        h4 {
+            font-size: 1.2rem;
+            margin: 1.2rem 0 0.8rem;
+            color: var(--dark);
+        }
+        
+        p {
+            margin-bottom: 1rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .card {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .nav-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        nav {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary);
+            padding: 1rem 0;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+        }
+        
+        .nav-links li {
+            margin-left: 2rem;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            transition: color 0.3s ease;
+            padding: 1rem 0;
+            display: block;
+        }
+        
+        .nav-links a:hover {
+            color: var(--secondary);
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--dark);
+            cursor: pointer;
+        }
+        
+        .section-icon {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            vertical-align: middle;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            display: inline-block;
+        }
+        
+        .data-container {
+            margin: 2rem 0;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin: 2rem 0;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+        }
+        
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--light-gray);
+        }
+        
+        th {
+            background-color: var(--light);
+            font-weight: 600;
+        }
+        
+        tr:hover {
+            background-color: var(--light-gray);
+        }
+        
+        .highlight {
+            background-color: var(--accent);
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+        
+        .list-item {
+            margin-bottom: 0.8rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+        
+        .list-item::before {
+            content: '•';
+            color: var(--secondary);
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+        
+        .two-column {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .pros-cons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+        
+        .pros, .cons {
+            padding: 1.5rem;
+            border-radius: 8px;
+        }
+        
+        .pros {
+            background-color: rgba(56, 161, 105, 0.1);
+            border-left: 4px solid var(--success);
+        }
+        
+        .cons {
+            background-color: rgba(229, 62, 62, 0.1);
+            border-left: 4px solid var(--danger);
+        }
+        
+        .pros h4, .cons h4 {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .pros h4::before, .cons h4::before {
+            content: '';
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            margin-right: 0.5rem;
+        }
+        
+        .pros h4::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%2338a169' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='22 12 18 12 15 21 9 3 6 12 2 12'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+        }
+        
+        .cons h4::before {
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23e53e3e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='18' y1='6' x2='6' y2='18'%3E%3C/line%3E%3Cline x1='6' y1='6' x2='18' y2='18'%3E%3C/line%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+        }
+        
+        .tag {
+            display: inline-block;
+            background-color: var(--light-gray);
+            color: var(--dark);
+            padding: 0.3rem 0.8rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            margin-right: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tag-primary {
+            background-color: var(--secondary);
+            color: white;
+        }
+        
+        .tag-accent {
+            background-color: var(--accent);
+            color: white;
+        }
+        
+        .tag-success {
+            background-color: var(--success);
+            color: white;
+        }
+        
+        .tag-warning {
+            background-color: var(--warning);
+            color: var(--dark);
+        }
+        
+        .tag-danger {
+            background-color: var(--danger);
+            color: white;
+        }
+        
+        .collapsible {
+            background-color: white;
+            cursor: pointer;
+            padding: 1rem;
+            width: 100%;
+            border: none;
+            text-align: left;
+            outline: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark);
+            border-radius: 8px;
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .active, .collapsible:hover {
+            background-color: var(--light-gray);
+        }
+        
+        .collapsible:after {
+            content: '\002B';
+            color: var(--secondary);
+            font-weight: bold;
+            float: right;
+            margin-left: 5px;
+        }
+        
+        .active:after {
+            content: "\2212";
+        }
+        
+        .content {
+            padding: 0 1rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+            background-color: white;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        
+        .content-inner {
+            padding: 1rem 0;
+        }
+        
+        footer {
+            background-color: var(--primary);
+            color: white;
+            padding: 2rem 0;
+            margin-top: 4rem;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 2rem;
+        }
+        
+        .footer-column {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .footer-column h3 {
+            color: white;
+            margin-bottom: 1rem;
+        }
+        
+        .footer-column ul {
+            list-style: none;
+        }
+        
+        .footer-column li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .footer-column a {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-column a:hover {
+            color: white;
+        }
+        
+        .copyright {
+            text-align: center;
+            padding-top: 2rem;
+            margin-top: 2rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 60px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+                line-height: 1.3;
+            }
+            
+            h2 {
+                font-size: 1.5rem;
+                line-height: 1.4;
+            }
+            
+            h3 {
+                font-size: 1.3rem;
+                line-height: 1.4;
+            }
+            
+            .nav-links {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                background-color: white;
+                flex-direction: column;
+                align-items: center;
+                padding: 1rem 0;
+                box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                max-height: 0;
+                overflow: hidden;
+                transition: max-height 0.3s ease;
+            }
+            
+            .nav-links.active {
+                max-height: 300px;
+            }
+            
+            .nav-links li {
+                margin: 0.5rem 0;
+            }
+            
+            .nav-links a {
+                padding: 0.8rem 1.5rem;
+                font-size: 1.1rem;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            .mobile-menu-btn {
+                display: block;
+                min-width: 44px;
+                min-height: 44px;
+                font-size: 1.2rem;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            /* 目录导航移动端优化 */
+            .table-of-contents {
+                padding: 1rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            .toc-title {
+                font-size: 1.1rem;
+                margin-bottom: 0.8rem;
+            }
+            
+            .toc-list {
+                grid-template-columns: 1fr;
+                gap: 0.3rem;
+            }
+            
+            .toc-list a {
+                padding: 0.8rem;
+                font-size: 0.95rem;
+                min-height: 44px;
+                display: flex;
+                align-items: center;
+            }
+            
+            /* 搜索框移动端优化 */
+            .search-container {
+                margin-bottom: 1.5rem;
+            }
+            
+            .search-input {
+                padding: 1rem;
+                font-size: 1rem;
+                min-height: 48px;
+                border-radius: 12px;
+            }
+            
+            /* 卡片移动端优化 */
+            .card {
+                padding: 1.5rem;
+                margin-bottom: 1.5rem;
+            }
+            
+            /* 表格移动端优化 */
+            table {
+                font-size: 0.9rem;
+            }
+            
+            table th,
+            table td {
+                padding: 0.5rem 0.3rem;
+                word-break: break-word;
+            }
+            
+            /* 返回顶部按钮移动端优化 */
+            .back-to-top {
+                bottom: 15px;
+                right: 15px;
+                width: 56px;
+                height: 56px;
+                font-size: 1.2rem;
+            }
+            
+            /* 进度条移动端优化 */
+            .progress-bar {
+                height: 4px;
+            }
+            
+            /* 列表移动端优化 */
+            ul, ol {
+                padding-left: 1.2rem;
+            }
+            
+            li {
+                margin-bottom: 0.5rem;
+            }
+            
+            /* 图片移动端优化 */
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+            
+            /* 代码块移动端优化 */
+            code {
+                font-size: 0.85rem;
+                padding: 0.2rem 0.4rem;
+            }
+            
+            pre {
+                font-size: 0.85rem;
+                padding: 1rem;
+                overflow-x: auto;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 1.8rem;
+                line-height: 1.2;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+                line-height: 1.3;
+            }
+            
+            h3 {
+                font-size: 1.1rem;
+                line-height: 1.3;
+            }
+            
+            .card {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+            
+            .chart-container {
+                height: 250px;
+            }
+            
+            /* 超小屏幕优化 */
+            .container {
+                padding: 0 1rem;
+            }
+            
+            .table-of-contents {
+                padding: 0.8rem;
+            }
+            
+            .toc-list a {
+                padding: 0.6rem;
+                font-size: 0.9rem;
+            }
+            
+            .search-input {
+                padding: 0.8rem;
+                font-size: 0.95rem;
+            }
+            
+            /* 表格超小屏幕优化 */
+            table {
+                font-size: 0.8rem;
+            }
+            
+            table th,
+            table td {
+                padding: 0.3rem 0.2rem;
+            }
+            
+            /* 返回顶部按钮超小屏幕优化 */
+            .back-to-top {
+                bottom: 10px;
+                right: 10px;
+                width: 50px;
+                height: 50px;
+                font-size: 1.1rem;
+            }
+        }
+        
+        /* 横屏模式优化 */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .nav-links.active {
+                max-height: 200px;
+            }
+            
+            .chart-container {
+                height: 200px;
+            }
+            
+            h1 {
+                font-size: 1.6rem;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+        }
+        
+        /* 高分辨率屏幕优化 */
+        @media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+            .progress-bar {
+                height: 2px;
+            }
+            
+            .back-to-top {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            }
+        }
+        
+        /* 移动端触摸优化 */
+        @media (hover: none) and (pointer: coarse) {
+            /* 触摸设备优化 */
+            .nav-links a,
+            .toc-list a,
+            .back-to-top,
+            .mobile-menu-btn {
+                -webkit-tap-highlight-color: transparent;
+                touch-action: manipulation;
+            }
+            
+            .nav-links a:active,
+            .toc-list a:active,
+            .back-to-top:active,
+            .mobile-menu-btn:active {
+                transform: scale(0.95);
+                transition: transform 0.1s ease;
+            }
+            
+            /* 搜索框触摸优化 */
+            .search-input {
+                -webkit-appearance: none;
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            /* 卡片触摸反馈 */
+            .card {
+                -webkit-tap-highlight-color: transparent;
+            }
+            
+            .card:active {
+                transform: translateY(1px);
+                transition: transform 0.1s ease;
+            }
+            
+            /* 表格触摸优化 */
+            table {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            /* 图表容器触摸优化 */
+            .chart-container {
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+        
+        /* 移动端滚动优化 */
+        @media (max-width: 768px) {
+            html {
+                scroll-behavior: smooth;
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            body {
+                -webkit-text-size-adjust: 100%;
+                -ms-text-size-adjust: 100%;
+            }
+        }
+        
+        /* 移动端字体优化 */
+        @media (max-width: 768px) {
+            body {
+                font-size: 16px; /* 防止iOS缩放 */
+            }
+            
+            input, textarea, select {
+                font-size: 16px; /* 防止iOS缩放 */
+            }
+        }
+        
+        /* 移动端加载状态优化 */
+        @media (max-width: 768px) {
+            .loading {
+                height: 150px;
+            }
+            
+            .loading::after {
+                width: 30px;
+                height: 30px;
+                border-width: 3px;
+            }
+        }
+        
+        /* 移动端错误状态优化 */
+        @media (max-width: 768px) {
+            .error-message {
+                padding: 0.8rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* 移动端快速导航 */
+        .mobile-quick-nav {
+            position: fixed;
+            left: 15px;
+            bottom: 80px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-quick-nav.visible {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .quick-nav-btn {
+            width: 45px;
+            height: 45px;
+            background: var(--secondary);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        .quick-nav-btn:hover {
+            background: var(--accent);
+            transform: scale(1.1);
+        }
+        
+        .quick-nav-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .quick-nav-btn:disabled {
+            background: var(--gray);
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+        
+        .quick-nav-btn:disabled:hover {
+            transform: none;
+            background: var(--gray);
+        }
+        
+        /* 移动端快速导航响应式 */
+        @media (max-width: 768px) {
+            .mobile-quick-nav {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .mobile-quick-nav {
+                left: 10px;
+                bottom: 70px;
+            }
+            
+            .quick-nav-btn {
+                width: 40px;
+                height: 40px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 阅读进度条 -->
+    <div class="progress-bar" id="progress-bar"></div>
+    
+    <div class="nav-container">
+        <nav>
+            <div class="logo">AI职业发展分析</div>
+            <button class="mobile-menu-btn" id="mobile-menu-btn" aria-label="切换导航菜单" aria-expanded="false">
+                <i class="fas fa-bars"></i>
+            </button>
+            <ul class="nav-links" id="nav-links" role="navigation" aria-label="主导航">
+                <li><a href="#section1" data-section="行业现状">行业现状</a></li>
+                <li><a href="#section2" data-section="就业方向">就业方向</a></li>
+                <li><a href="#section3" data-section="能力构建">能力构建</a></li>
+                <li><a href="#section4" data-section="竞争力提升">竞争力提升</a></li>
+                <li><a href="#section5" data-section="二本学生路径">二本学生路径</a></li>
+                <li><a href="#section6" data-section="结论展望">结论展望</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <header>
+        <div class="container">
+            <h1>AI未来就业形势与大学生职业发展全面分析</h1>
+            <p>探索AI时代的职业机遇与挑战，助力大学生规划职业发展路径</p>
+            <p style="font-size: 0.9rem; opacity: 0.8; margin-top: 1rem;">
+                <i class="fas fa-clock"></i> 数据更新时间：2024年12月
+            </p>
+        </div>
+    </header>
+
+    <div class="container">
+        <!-- 目录导航 -->
+        <div class="table-of-contents">
+            <h3 class="toc-title">目录导航</h3>
+            <ul class="toc-list">
+                <li><a href="#section1">一、AI行业就业现状</a></li>
+                <li><a href="#section2">二、大学生AI就业方向</a></li>
+                <li><a href="#section3">三、大学生AI就业能力构建</a></li>
+                <li><a href="#section4">四、大学生AI就业竞争力提升策略</a></li>
+                <li><a href="#section5">五、二本院校学生AI就业路径分析</a></li>
+                <li><a href="#section6">六、结论与展望</a></li>
+            </ul>
+        </div>
+        
+        <!-- 搜索功能 -->
+        <div class="search-container">
+            <input type="text" class="search-input" id="search-input" placeholder="搜索内容..." aria-label="搜索页面内容">
+        </div>
+        
+        <section id="section1" class="card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h2 class="section-title">一、AI行业就业现状：高需求、高门槛、高回报</h2>
+            </div>
+            
+            <h3>1.1 市场规模与人才需求爆发式增长</h3>
+            <p>AI行业正处于高速发展阶段，市场规模持续扩大，人才需求旺盛。根据最新数据，全球AI市场规模在2025年已达7575.8亿美元，预计到2034年将达到约36804.7亿美元，年复合增长率达19.20%。在中国，AI产业规模突破7000亿元，连续多年保持20%以上增长率。</p>
+            
+            <div class="data-container">
+                <h4>AI市场规模增长趋势</h4>
+                <div class="chart-container">
+                    <div class="loading" id="marketGrowthLoading">加载中...</div>
+                    <canvas id="marketGrowthChart"></canvas>
+                </div>
+            </div>
+            
+            <p>人才需求方面，2025年春招中，人工智能行业求职人数同比增长33.4%，位居各行业榜首。AI工程师岗位平均年薪达69.6万元人民币，超过全行业平均水平的2.5倍。从岗位分布看，算法工程师(占比35%)、机器学习工程师(25%)、深度学习工程师(15%)、AI系统架构师(10%)占据主导地位，边缘计算、AIGC等新兴岗位增速更是超过50%。</p>
+            
+            <div class="data-container">
+                <h4>AI岗位需求分布</h4>
+                <div class="chart-container">
+                    <div class="loading" id="jobDistributionLoading">加载中...</div>
+                    <canvas id="jobDistributionChart"></canvas>
+                </div>
+            </div>
+            
+            <h3>1.2 人才供需结构与竞争态势</h3>
+            <p>AI人才市场呈现出明显的结构性矛盾。一方面，初级岗位竞争激烈，仅掌握Python基础语法和简单机器学习模型的求职者，面临5:1的岗位竞争比，薪资水平集中在12-20万/年。另一方面，高端人才严重短缺，具备复杂算法设计能力和大规模系统优化经验的工程师，薪资可达80-200万/年。</p>
+            
+            <p>在行业分布上，互联网行业对AI技术人才需求最为旺盛，占比达30.37%；电子/半导体/集成电路、计算机软件、人工智能、机械/设备行业分别以21.25%、19.35%、13.87%和7.10%的占比位居其后。从区域分布看，长三角地区成为AI技术人才需求最旺盛的城市群，占比高达40.11%；粤港澳大湾区与京津冀几乎并驾齐驱，占比均超22%。</p>
+            
+            <div class="data-container">
+                <h4>AI人才学历要求对比</h4>
+                <div class="chart-container">
+                    <div class="loading" id="educationLoading">加载中...</div>
+                    <canvas id="educationChart"></canvas>
+                </div>
+            </div>
+            
+            <h3>1.3 技术变革与职业转型</h3>
+            <p>AI技术的快速发展正在重塑就业市场格局。一方面，AI替代了一些重复性、规律性的工作，如基础数据处理、初级客服等；另一方面，也创造了大量新兴职业，如AI训练师、AI伦理工程师、AI产品经理等。</p>
+            
+            <div class="data-container">
+                <h4>AI对就业机会的影响预测</h4>
+                <div class="chart-container">
+                    <div class="loading" id="jobImpactLoading">加载中...</div>
+                    <canvas id="jobImpactChart"></canvas>
+                </div>
+            </div>
+            
+            <p>世界经济论坛最新发布的《2025年未来就业报告》预测，全球职场将有22%的就业机会面临变革，新创造的工作岗位1.7亿个、被替代的工作岗位9200万个，就业机会净增7800万个。在这一过程中，大数据专家、AI和机器学习专业人士的需求将大幅增长。</p>
+        </section>
+        
+        <section id="section2" class="card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-sitemap"></i>
+                </div>
+                <h2 class="section-title">二、大学生AI就业方向与技术要求</h2>
+            </div>
+            
+            <div class="two-column">
+                <div>
+                    <h3>2.1 AI技术研发方向</h3>
+                    <p>AI技术研发是AI行业的核心领域，也是高学历人才的主要就业方向。这一领域的主要岗位包括机器学习工程师、深度学习工程师、算法工程师等。</p>
+                    
+                    <div class="collapsible">机器学习工程师</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>核心职责是设计、优化机器学习模型，推动算法落地。该岗位平均年薪达16.18万美元(约合人民币112万元)，位居AI岗位薪资榜首。需要熟练掌握Python、TensorFlow/PyTorch等框架，并具备较强的数学建模能力。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="collapsible">深度学习工程师</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>主要负责神经网络模型的开发与优化，在图像识别、语音识别、自然语言处理等领域发挥关键作用。该岗位平均年薪15万美元，涨幅预计超过10%。需要深入理解卷积神经网络、循环神经网络等模型结构，并能够进行模型训练和调优。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="collapsible">算法工程师</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>是AI技术研发的核心力量，在AI人才需求中占比高达35%。需要具备扎实的数学基础和算法设计能力，能够解决复杂的优化问题。在2025年春招中，算法工程师岗位招聘同比增速达46.8%，平均招聘月薪为23510元，求职人数同比增速超过200%。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>2.2 AI应用开发方向</h3>
+                    <p>AI应用开发是将AI技术与具体行业场景结合的领域，主要岗位包括AI产品经理、行业解决方案架构师、AI系统集成工程师等。</p>
+                    
+                    <div class="collapsible">AI产品经理</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>是连接技术与业务的桥梁，负责推动AI工具商业化。该岗位年薪可达80-100万元，需要兼具技术逻辑与行业洞察力。核心能力包括需求转化、用例规划、大模型落地经验等。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="collapsible">行业解决方案架构师</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>主要负责为特定行业设计AI解决方案，如医疗AI辅助诊断、金融风控、智能制造等。该岗位需要具备跨领域知识，如制造业MES系统+AI、医疗DICOM标准+AI等。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="collapsible">AI系统集成工程师</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>负责将AI模型部署到实际应用环境中，确保系统的稳定运行。需要掌握云平台、容器化部署、微服务架构等技术，并具备一定的运维能力。随着AI应用的普及，系统集成工程师的需求正在快速增长。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="two-column">
+                <div>
+                    <h3>2.3 AI数据分析方向</h3>
+                    <p>AI数据分析是AI应用的重要支撑，主要岗位包括数据科学家、数据分析师、商业智能分析师等。</p>
+                    
+                    <div class="collapsible">数据科学家</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>需要综合统计学、数学和计算机科学知识，从数据中提取价值。该岗位市场需求约5,000个职位空缺，平均年薪12.31万美元。需要熟练掌握SQL、机器学习、数据可视化等技能，并能够使用Python或R进行数据分析。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="collapsible">AI训练师</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>是一个新兴职业，主要负责训练和优化AI模型。随着AI应用的普及，AI训练师的需求正在快速增长。需要具备一定的机器学习知识和丰富的行业经验，能够根据业务需求调整模型参数，提高模型性能。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="collapsible">AI伦理工程师</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>是另一个新兴职业，主要负责确保AI系统的开发和使用符合伦理规范。随着AI伦理问题日益受到关注，AI伦理工程师的需求也在增加。需要具备伦理学、计算机科学和法律知识，能够识别和解决AI系统中的伦理问题。</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3>2.4 跨学科融合方向</h3>
+                    <p>随着AI技术的广泛应用，跨学科融合成为AI就业的重要趋势。主要的跨学科方向包括AI+医疗、AI+金融、AI+教育、AI+制造等。</p>
+                    
+                    <div class="collapsible">AI+医疗</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>领域正在快速发展，预计2025年中国AI医疗行业规模将达到1157亿元。该领域的主要岗位包括医疗AI训练师、医疗数据分析师、生物信息学工程师等。医疗AI训练师需要呼吸科医生与数据工程师联合工作，利用AI自动识别标准化病例，医生负责标注数据、评估模型，数据工程师负责构建算法、优化模型。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="collapsible">AI+金融</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>领域也呈现出强劲的发展势头。金融行业对AI人才的需求主要集中在量化交易、风险控制、智能客服等方面。金融AI人才需要兼具金融知识和AI技术能力，能够开发适合金融场景的AI模型。</p>
+                        </div>
+                    </div>
+                    
+                    <div class="collapsible">AI+制造</div>
+                    <div class="content">
+                        <div class="content-inner">
+                            <p>是国家重点支持的领域，2025年智能制造领域的人才需求将达900万人，而人才缺口预计将达到450万人。该领域的主要岗位包括工业机器人工程师、智能工厂数字孪生工程师等。工业机器人工程师年薪可达60-120万，而智能工厂数字孪生工程师在宁德时代等企业创造了5000多个新岗位。</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section3" class="card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <h2 class="section-title">三、大学生AI就业能力构建</h2>
+            </div>
+            
+            <h3>3.1 数学基础与算法能力</h3>
+            <p>数学是AI的基础，扎实的数学功底是成为优秀AI人才的必备条件。大学生需要重点掌握高等数学、线性代数、概率论与数理统计等数学知识。</p>
+            
+            <div class="two-column">
+                <div>
+                    <div class="list-item">
+                        <h4>高等数学</h4>
+                        <p>是AI的基础工具，特别是微积分在机器学习算法中有着广泛应用。导数和梯度下降是优化算法的核心，积分在概率分布计算中起着关键作用。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>线性代数</h4>
+                        <p>是AI的数学基石，向量、矩阵、线性变换等概念在机器学习和深度学习中无处不在。深度学习中的神经网络本质上是一系列线性变换和非线性激活的组合。</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="list-item">
+                        <h4>概率论与数理统计</h4>
+                        <p>是AI不确定性处理的核心工具。概率模型、贝叶斯理论、假设检验等知识在机器学习中有着广泛应用。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>算法设计与分析</h4>
+                        <p>是AI人才的核心能力。需要掌握常见的数据结构和算法，如数组、链表、栈、队列、树、图等数据结构，以及排序、搜索、动态规划、贪心算法等算法设计方法。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>3.2 编程能力与工具掌握</h3>
+            <p>编程能力是AI人才的基本技能，大学生需要熟练掌握至少一种编程语言，并熟悉常用的AI开发工具和框架。</p>
+            
+            <div class="data-container">
+                <h4>AI开发工具与框架</h4>
+                <div class="chart-container">
+                    <div class="loading" id="toolsLoading">加载中...</div>
+                    <canvas id="toolsChart"></canvas>
+                </div>
+            </div>
+            
+            <div class="two-column">
+                <div>
+                    <div class="list-item">
+                        <h4>Python</h4>
+                        <p>是AI领域的首选语言，具有简洁的语法和丰富的第三方库。Python在AI领域的统治地位体现在TensorFlow、PyTorch等框架的Python接口覆盖率超过95%，Scikit-learn、Keras等库简化了模型开发流程。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>C++</h4>
+                        <p>在AI系统开发和性能优化中有着重要作用。在实时推理、边缘计算等场景中，Python的效率可能不足，需要结合C++进行部署优化和GPU加速。</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="list-item">
+                        <h4>机器学习和深度学习框架</h4>
+                        <p>TensorFlow和PyTorch是目前最流行的深度学习框架，Scikit-learn是常用的机器学习库。需要熟练掌握这些框架的基本使用方法，能够构建、训练和评估各种机器学习和深度学习模型。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>数据处理和可视化工具</h4>
+                        <p>Pandas用于数据清洗和处理，Matplotlib和Seaborn用于数据可视化，这些工具能够帮助AI人才更好地理解和分析数据。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>3.3 实践能力与项目经验</h3>
+            <p>实践能力和项目经验是AI人才的核心竞争力，大学生应该通过参与实践项目、科研活动和竞赛来积累经验。</p>
+            
+            <div class="two-column">
+                <div>
+                    <div class="list-item">
+                        <h4>参与科研项目</h4>
+                        <p>是提升AI能力的有效途径。可以加入学校的AI实验室，参与导师的科研项目，接触前沿的AI技术和研究方法。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>完成实践项目</h4>
+                        <p>是将理论知识转化为实际能力的关键环节。可以选择一些经典的AI项目进行实践，如图像分类、文本生成、推荐系统等。</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="list-item">
+                        <h4>参加AI竞赛</h4>
+                        <p>是提升AI能力和增加就业竞争力的有效途径。Kaggle、天池大赛等平台提供了丰富的AI竞赛题目，参与这些竞赛能够锻炼实战能力。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>开源贡献</h4>
+                        <p>是展示AI能力和积累经验的重要方式。GitHub等平台上有大量的AI开源项目，参与这些项目的开发和优化能够提高代码质量和协作能力。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>3.4 跨学科知识与行业理解</h3>
+            <p>AI技术的应用越来越广泛，跨学科知识和行业理解成为AI人才的重要竞争力。大学生应该根据自己的兴趣和职业规划，选择一个或几个行业领域进行深入学习。</p>
+            
+            <div class="tag-container">
+                <span class="tag tag-primary">医疗领域</span>
+                <span class="tag tag-accent">金融领域</span>
+                <span class="tag tag-success">制造领域</span>
+                <span class="tag tag-warning">教育领域</span>
+                <span class="tag tag-danger">交通领域</span>
+            </div>
+        </section>
+        
+        <section id="section4" class="card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-trophy"></i>
+                </div>
+                <h2 class="section-title">四、大学生AI就业竞争力提升策略</h2>
+            </div>
+            
+            <h3>4.1 学历提升与专业选择</h3>
+            <p>在AI行业，学历是重要的敲门砖。根据猎聘数据，近一年明确要求硕博学历的AI技术职位占比高达46.98%，远高于整体职位的4.47%。因此，对于有志于在AI领域发展的大学生来说，考研是提升竞争力的有效途径。</p>
+            
+            <div class="two-column">
+                <div>
+                    <div class="list-item">
+                        <h4>硕士研究生</h4>
+                        <p>是AI行业的主流学历要求。硕士研究生通常需要进行2-3年的系统学习和研究，能够深入掌握AI的理论知识和实践技能。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>博士研究生</h4>
+                        <p>在AI核心研发岗位具有明显优势。博士研究生通常需要进行3-5年的深入研究，能够在某一领域做出创新性贡献。</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="list-item">
+                        <h4>专业选择</h4>
+                        <p>计算机科学与技术、人工智能、软件工程、数据科学等专业与AI直接相关，是进入AI行业的理想选择。此外，数学、统计学等基础学科在AI领域也有广阔的就业前景。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>二本院校学生</h4>
+                        <p>对于二本院校的学生来说，考研是提升学历和学校层次的重要途径。虽然直接进入头部企业核心研发岗的难度较大，但通过考研进入重点高校，可以显著提升竞争力。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>4.2 项目经验与实习经历</h3>
+            <p>项目经验和实习经历是证明实践能力的重要依据，也是企业招聘时的重要考量因素。大学生应该积极参与实践项目，争取优质的实习机会。</p>
+            
+            <div class="two-column">
+                <div>
+                    <div class="list-item">
+                        <h4>个人项目</h4>
+                        <p>是展示能力的有效方式。可以根据自己的兴趣和学习进度，完成一些小型的AI项目，如图像识别、文本生成、智能问答等。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>科研项目</h4>
+                        <p>是提升学术能力和研究水平的重要途径。可以参与导师的科研项目，接触前沿的AI技术和研究方法。</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="list-item">
+                        <h4>企业实习</h4>
+                        <p>是了解行业需求和提升实践能力的最佳途径。可以利用寒暑假和毕业前的时间，到AI企业或相关行业企业实习，接触真实的工作环境和项目需求。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>实习选择策略</h4>
+                        <p>优先选择AI技术领先的企业，如Google、Microsoft、DeepMind、百度、华为、腾讯等。如果无法进入这些头部企业，也可以选择在细分领域有优势的企业。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>4.3 竞赛参与与开源贡献</h3>
+            <p>参与AI竞赛和开源贡献是提升竞争力的有效途径，能够展示学生的实践能力和创新思维。</p>
+            
+            <div class="two-column">
+                <div>
+                    <div class="list-item">
+                        <h4>AI竞赛</h4>
+                        <p>是锻炼实战能力和接触真实问题的重要平台。Kaggle、天池大赛、ACM-ICPC等竞赛提供了丰富的AI题目和数据集，参与这些竞赛能够锻炼问题解决能力和团队协作能力。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>开源贡献</h4>
+                        <p>是展示代码能力和协作能力的重要方式。GitHub等平台上有大量的AI开源项目，参与这些项目的开发和优化能够提高代码质量和协作能力。</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="list-item">
+                        <h4>竞赛和开源贡献的选择策略</h4>
+                        <p>根据自己的兴趣和能力，选择适合自己的竞赛和开源项目。对于初学者，可以选择一些入门级的竞赛和小型开源项目，逐步积累经验和信心。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>职业规划</h4>
+                        <p>根据自己的职业规划，选择与目标行业相关的竞赛和项目，如医疗AI竞赛、金融科技项目等。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>4.4 软技能培养与职业规划</h3>
+            <p>在AI行业，除了技术能力外，软技能也非常重要。大学生应该注重沟通能力、团队协作能力、项目管理能力等软技能的培养。</p>
+            
+            <div class="two-column">
+                <div>
+                    <div class="list-item">
+                        <h4>沟通能力</h4>
+                        <p>是AI人才的重要竞争力。需要与不同背景的人进行沟通，包括技术团队、产品团队、业务团队和客户等。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>团队协作能力</h4>
+                        <p>是现代职场的基本要求。AI项目通常需要跨学科团队的协作，如算法工程师、开发工程师、产品经理、测试工程师等。</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="list-item">
+                        <h4>项目管理能力</h4>
+                        <p>对于高级AI人才尤为重要。随着职业生涯的发展，可能需要负责大型项目的规划、执行和管理。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>职业规划</h4>
+                        <p>对于大学生的成长和发展至关重要。AI行业发展迅速，技术更新迭代快，应该有一个清晰的职业规划，明确自己的发展方向和目标。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section5" class="card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-graduation-cap"></i>
+                </div>
+                <h2 class="section-title">五、二本院校学生AI就业路径分析</h2>
+            </div>
+            
+            <h3>5.1 二本学生AI就业现状分析</h3>
+            <p>二本院校学生在AI就业市场上面临一定的挑战。一方面，AI行业对学历和学校层次有较高要求，头部企业的算法岗录取率常低于5%，通常要求硕士以上学历或顶级竞赛奖项。另一方面，二本院校的教学资源和实践机会相对有限，学生在技术能力和项目经验方面可能存在不足。</p>
+            
+            <p>然而，二本院校学生也有自身的优势。二本院校通常更注重应用型人才培养，学生在实践能力和动手能力方面可能具有一定优势。此外，二本院校学生往往更加务实，能够更快适应工作岗位的需求。</p>
+            
+            <h3>5.2 二本学生考研提升学历的利弊分析</h3>
+            
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>考研的优势</h4>
+                    <div class="list-item">提升学历竞争力</div>
+                    <div class="list-item">提高学校层次</div>
+                    <div class="list-item">深入学习AI技术</div>
+                    <div class="list-item">增加就业选择</div>
+                    <div class="list-item">提高薪资水平</div>
+                </div>
+                
+                <div class="cons">
+                    <h4>考研的劣势</h4>
+                    <div class="list-item">时间成本</div>
+                    <div class="list-item">机会成本</div>
+                    <div class="list-item">不确定性</div>
+                    <div class="list-item">经济压力</div>
+                    <div class="list-item">实践经验不足</div>
+                </div>
+            </div>
+            
+            <h3>5.3 二本学生2027年考研决策建议</h3>
+            
+            <div class="two-column">
+                <div>
+                    <h4>适合考研的情况</h4>
+                    <div class="list-item">对AI理论研究有浓厚兴趣</div>
+                    <div class="list-item">目标是进入头部企业核心研发岗</div>
+                    <div class="list-item">有足够的时间和资源投入</div>
+                    <div class="list-item">学校和专业背景相对薄弱</div>
+                    <div class="list-item">希望从事学术研究或高校教学</div>
+                </div>
+                
+                <div>
+                    <h4>不适合考研的情况</h4>
+                    <div class="list-item">对AI理论研究兴趣不大</div>
+                    <div class="list-item">有优质的就业机会</div>
+                    <div class="list-item">不擅长考试和理论学习</div>
+                    <div class="list-item">经济压力较大</div>
+                    <div class="list-item">有明确的创业计划</div>
+                </div>
+            </div>
+            
+            <h3>5.4 二本学生不考研的替代路径</h3>
+            
+            <div class="two-column">
+                <div>
+                    <h4>技术能力提升路径</h4>
+                    <div class="list-item">系统自学AI技术</div>
+                    <div class="list-item">参与实践项目</div>
+                    <div class="list-item">参加技能培训</div>
+                    <div class="list-item">获取专业认证</div>
+                    <div class="list-item">参与行业竞赛</div>
+                </div>
+                
+                <div>
+                    <h4>就业策略调整</h4>
+                    <div class="list-item">聚焦AI应用开发方向</div>
+                    <div class="list-item">关注新兴领域和细分市场</div>
+                    <div class="list-item">考虑中小型AI企业</div>
+                    <div class="list-item">从相关岗位切入</div>
+                    <div class="list-item">提升跨领域能力</div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="section6" class="card">
+            <div class="section-header">
+                <div class="section-icon">
+                    <i class="fas fa-lightbulb"></i>
+                </div>
+                <h2 class="section-title">六、结论与展望</h2>
+            </div>
+            
+            <h3>6.1 AI就业市场的未来趋势</h3>
+            <p>AI就业市场正处于快速发展阶段，未来几年将呈现以下趋势：</p>
+            
+            <div class="two-column">
+                <div>
+                    <div class="list-item">
+                        <h4>技术方向多元化</h4>
+                        <p>AI技术将从单一的算法研发向多方向发展，包括机器学习、深度学习、计算机视觉、自然语言处理、强化学习等多个方向。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>应用领域扩大化</h4>
+                        <p>AI应用将从互联网行业向传统行业全面渗透，包括医疗、金融、制造、教育、交通等多个领域。</p>
+                    </div>
+                </div>
+                
+                <div>
+                    <div class="list-item">
+                        <h4>岗位结构调整</h4>
+                        <p>AI就业市场将出现"两极分化"现象，高端算法研发岗位和低端数据处理岗位的需求将增加，而中端常规岗位的需求将减少。</p>
+                    </div>
+                    
+                    <div class="list-item">
+                        <h4>区域分布变化</h4>
+                        <p>AI就业市场的区域分布将从一线城市向新一线城市和二线城市扩展。成都、武汉、西安等城市的AI就业机会将增加。</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h3>6.2 大学生AI就业的机遇与挑战</h3>
+            
+            <div class="pros-cons">
+                <div class="pros">
+                    <h4>机遇方面</h4>
+                    <div class="list-item">就业机会丰富</div>
+                    <div class="list-item">薪资水平高</div>
+                    <div class="list-item">发展空间大</div>
+                    <div class="list-item">跨领域机会多</div>
+                    <div class="list-item">创业机会多</div>
+                </div>
+                
+                <div class="cons">
+                    <h4>挑战方面</h4>
+                    <div class="list-item">竞争激烈</div>
+                    <div class="list-item">技术更新快</div>
+                    <div class="list-item">学历要求高</div>
+                    <div class="list-item">复合型人才需求增加</div>
+                    <div class="list-item">伦理和责任问题</div>
+                </div>
+            </div>
+            
+            <h3>6.3 大学生AI就业的战略建议</h3>
+            <p>基于以上分析，我们对大学生AI就业提出以下战略建议：</p>
+            
+            <div class="two-column">
+                <div>
+                    <h4>能力构建策略</h4>
+                    <div class="list-item">夯实数学基础</div>
+                    <div class="list-item">提升编程能力</div>
+                    <div class="list-item">培养算法思维</div>
+                    <div class="list-item">积累实践经验</div>
+                    <div class="list-item">发展跨学科能力</div>
+                </div>
+                
+                <div>
+                    <h4>学历与就业决策</h4>
+                    <div class="list-item">根据个人情况做选择</div>
+                    <div class="list-item">考研准备要趁早</div>
+                    <div class="list-item">就业准备不松懈</div>
+                    <div class="list-item">多元化发展路径</div>
+                    <div class="list-item">关注新兴领域</div>
+                </div>
+            </div>
+            
+            <p>AI时代为大学生提供了广阔的就业前景和发展空间。无论是选择考研还是就业，都需要持续学习，不断提升自己的能力和素质，才能在这个快速发展的领域中立于不败之地。</p>
+        </section>
+    </div>
+
+            <!-- 返回顶部按钮 -->
+        <button class="back-to-top" id="back-to-top" aria-label="返回顶部">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+        
+        <!-- 移动端快速导航 -->
+        <div class="mobile-quick-nav" id="mobile-quick-nav">
+            <button class="quick-nav-btn" id="prev-section" aria-label="上一节">
+                <i class="fas fa-chevron-up"></i>
+            </button>
+            <button class="quick-nav-btn" id="next-section" aria-label="下一节">
+                <i class="fas fa-chevron-down"></i>
+            </button>
+        </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>关于我们</h3>
+                    <p>我们致力于为大学生提供专业的职业发展分析和指导，帮助他们在AI时代找到适合自己的职业道路。</p>
+                </div>
+                <div class="footer-column">
+                    <h3>快速链接</h3>
+                    <ul>
+                        <li><a href="#section1">行业现状</a></li>
+                        <li><a href="#section2">就业方向</a></li>
+                        <li><a href="#section3">能力构建</a></li>
+                        <li><a href="#section4">竞争力提升</a></li>
+                        <li><a href="#section5">二本学生路径</a></li>
+                        <li><a href="#section6">结论展望</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h3>联系方式</h3>
+                    <ul>
+                        <li><a href="mailto:contact@example.com">contact@example.com</a></li>
+                        <li><a href="https://www.example.com" target="_blank">www.example.com</a></li>
+                        <li><a href="https://www.linkedin.com" target="_blank">LinkedIn</a></li>
+                        <li><a href="https://www.weibo.com" target="_blank">微博</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; 2023 AI职业发展分析. 保留所有权利。
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 移动菜单切换
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const navLinks = document.getElementById('nav-links');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            const isExpanded = navLinks.classList.contains('active');
+            navLinks.classList.toggle('active');
+            mobileMenuBtn.setAttribute('aria-expanded', !isExpanded);
+        });
+        
+        // 移动端导航优化
+        const navLinksItems = document.querySelectorAll('.nav-links a');
+        
+        navLinksItems.forEach(link => {
+            link.addEventListener('click', function(e) {
+                // 在移动端点击导航链接后自动关闭菜单
+                if (window.innerWidth <= 768) {
+                    navLinks.classList.remove('active');
+                    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                }
+                
+                // 添加点击反馈
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+        
+        // 移动端滚动时自动隐藏导航菜单
+        let scrollTimeout;
+        window.addEventListener('scroll', function() {
+            if (window.innerWidth <= 768 && navLinks.classList.contains('active')) {
+                clearTimeout(scrollTimeout);
+                scrollTimeout = setTimeout(() => {
+                    navLinks.classList.remove('active');
+                    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                }, 1000);
+            }
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                // 关闭移动菜单
+                navLinks.classList.remove('active');
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 70,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // 折叠面板
+        const coll = document.getElementsByClassName("collapsible");
+        for (let i = 0; i < coll.length; i++) {
+            coll[i].addEventListener("click", function() {
+                this.classList.toggle("active");
+                const content = this.nextElementSibling;
+                if (content.style.maxHeight) {
+                    content.style.maxHeight = null;
+                } else {
+                    content.style.maxHeight = content.scrollHeight + "px";
+                }
+            });
+        }
+        
+        // 阅读进度条
+        const progressBar = document.getElementById('progress-bar');
+        window.addEventListener('scroll', () => {
+            const scrollTop = window.pageYOffset;
+            const docHeight = document.body.offsetHeight - window.innerHeight;
+            const scrollPercent = (scrollTop / docHeight) * 100;
+            progressBar.style.width = scrollPercent + '%';
+        });
+        
+        // 返回顶部按钮
+        const backToTopBtn = document.getElementById('back-to-top');
+        window.addEventListener('scroll', () => {
+            if (window.pageYOffset > 300) {
+                backToTopBtn.classList.add('visible');
+            } else {
+                backToTopBtn.classList.remove('visible');
+            }
+        });
+        
+        backToTopBtn.addEventListener('click', () => {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 搜索功能
+        const searchInput = document.getElementById('search-input');
+        let searchTimeout;
+        
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                const searchTerm = e.target.value.toLowerCase();
+                if (searchTerm.length < 2) {
+                    clearSearchHighlight();
+                    return;
+                }
+                performSearch(searchTerm);
+            }, 300);
+        });
+        
+        // 移动端触摸优化
+        let touchStartY = 0;
+        let touchEndY = 0;
+        
+        // 添加触摸手势支持
+        document.addEventListener('touchstart', function(e) {
+            touchStartY = e.touches[0].clientY;
+        }, { passive: true });
+        
+        document.addEventListener('touchend', function(e) {
+            touchEndY = e.changedTouches[0].clientY;
+            handleTouchGesture();
+        }, { passive: true });
+        
+        function handleTouchGesture() {
+            const touchDiff = touchStartY - touchEndY;
+            const minSwipeDistance = 50;
+            
+            // 向上滑动显示返回顶部按钮
+            if (touchDiff > minSwipeDistance && window.scrollY > 500) {
+                const backToTop = document.getElementById('back-to-top');
+                if (backToTop && !backToTop.classList.contains('visible')) {
+                    backToTop.classList.add('visible');
+                    setTimeout(() => {
+                        backToTop.classList.remove('visible');
+                    }, 2000);
+                }
+            }
+        }
+        
+        // 移动端双击缩放优化
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', function(event) {
+            const now = (new Date()).getTime();
+            if (now - lastTouchEnd <= 300) {
+                event.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, false);
+        
+        // 移动端滚动性能优化
+        let ticking = false;
+        function updateOnScroll() {
+            // 更新进度条
+            const progressBar = document.getElementById('progress-bar');
+            const backToTop = document.getElementById('back-to-top');
+            
+            if (progressBar) {
+                const scrollTop = window.pageYOffset;
+                const docHeight = document.body.scrollHeight - window.innerHeight;
+                const scrollPercent = (scrollTop / docHeight) * 100;
+                progressBar.style.width = scrollPercent + '%';
+            }
+            
+            if (backToTop) {
+                if (window.pageYOffset > 300) {
+                    backToTop.classList.add('visible');
+                } else {
+                    backToTop.classList.remove('visible');
+                }
+            }
+            
+            ticking = false;
+        }
+        
+        window.addEventListener('scroll', function() {
+            if (!ticking) {
+                requestAnimationFrame(updateOnScroll);
+                ticking = true;
+            }
+        });
+        
+        // 移动端快速导航功能
+        const mobileQuickNav = document.getElementById('mobile-quick-nav');
+        const prevSectionBtn = document.getElementById('prev-section');
+        const nextSectionBtn = document.getElementById('next-section');
+        
+        // 获取所有章节
+        const sections = document.querySelectorAll('section[id^="section"]');
+        
+        function updateQuickNav() {
+            if (window.innerWidth <= 768) {
+                const currentScroll = window.pageYOffset;
+                let currentSectionIndex = -1;
+                
+                // 找到当前章节
+                sections.forEach((section, index) => {
+                    const sectionTop = section.offsetTop - 100;
+                    const sectionBottom = sectionTop + section.offsetHeight;
+                    
+                    if (currentScroll >= sectionTop && currentScroll < sectionBottom) {
+                        currentSectionIndex = index;
+                    }
+                });
+                
+                // 更新按钮状态
+                prevSectionBtn.disabled = currentSectionIndex <= 0;
+                nextSectionBtn.disabled = currentSectionIndex >= sections.length - 1;
+                
+                // 显示/隐藏快速导航
+                if (currentScroll > 300) {
+                    mobileQuickNav.classList.add('visible');
+                } else {
+                    mobileQuickNav.classList.remove('visible');
+                }
+            }
+        }
+        
+        // 上一节
+        prevSectionBtn.addEventListener('click', function() {
+            const currentScroll = window.pageYOffset;
+            let targetSection = null;
+            
+            for (let i = sections.length - 1; i >= 0; i--) {
+                const sectionTop = sections[i].offsetTop - 100;
+                if (currentScroll > sectionTop) {
+                    if (i > 0) {
+                        targetSection = sections[i - 1];
+                    }
+                    break;
+                }
+            }
+            
+            if (targetSection) {
+                window.scrollTo({
+                    top: targetSection.offsetTop - 70,
+                    behavior: 'smooth'
+                });
+            }
+        });
+        
+        // 下一节
+        nextSectionBtn.addEventListener('click', function() {
+            const currentScroll = window.pageYOffset;
+            let targetSection = null;
+            
+            for (let i = 0; i < sections.length; i++) {
+                const sectionTop = sections[i].offsetTop - 100;
+                if (currentScroll < sectionTop) {
+                    targetSection = sections[i];
+                    break;
+                }
+            }
+            
+            if (targetSection) {
+                window.scrollTo({
+                    top: targetSection.offsetTop - 70,
+                    behavior: 'smooth'
+                });
+            }
+        });
+        
+        // 监听滚动更新快速导航
+        window.addEventListener('scroll', updateQuickNav);
+        window.addEventListener('resize', updateQuickNav);
+        
+        function performSearch(searchTerm) {
+            clearSearchHighlight();
+            const content = document.querySelector('.container');
+            const textNodes = getTextNodes(content);
+            
+            textNodes.forEach(node => {
+                const text = node.textContent;
+                if (text.toLowerCase().includes(searchTerm)) {
+                    const highlightedText = text.replace(
+                        new RegExp(searchTerm, 'gi'),
+                        match => `<span class="highlight-search">${match}</span>`
+                    );
+                    const span = document.createElement('span');
+                    span.innerHTML = highlightedText;
+                    node.parentNode.replaceChild(span, node);
+                }
+            });
+        }
+        
+        function clearSearchHighlight() {
+            const highlights = document.querySelectorAll('.highlight-search');
+            highlights.forEach(highlight => {
+                const parent = highlight.parentNode;
+                parent.replaceChild(document.createTextNode(highlight.textContent), highlight);
+                parent.normalize();
+            });
+        }
+        
+        function getTextNodes(element) {
+            const textNodes = [];
+            const walker = document.createTreeWalker(
+                element,
+                NodeFilter.SHOW_TEXT,
+                null,
+                false
+            );
+            
+            let node;
+            while (node = walker.nextNode()) {
+                if (node.textContent.trim()) {
+                    textNodes.push(node);
+                }
+            }
+            return textNodes;
+        }
+        
+        // 图表错误处理
+        function createChartWithErrorHandling(canvasId, chartConfig) {
+            try {
+                const canvas = document.getElementById(canvasId);
+                const loadingId = canvasId.replace('Chart', 'Loading');
+                const loadingElement = document.getElementById(loadingId);
+                
+                if (!canvas) {
+                    console.error(`Canvas element with id '${canvasId}' not found`);
+                    return null;
+                }
+                
+                const ctx = canvas.getContext('2d');
+                if (!ctx) {
+                    console.error(`Could not get 2D context for canvas '${canvasId}'`);
+                    return null;
+                }
+                
+                // 隐藏加载状态
+                if (loadingElement) {
+                    loadingElement.style.display = 'none';
+                }
+                
+                return new Chart(ctx, chartConfig);
+            } catch (error) {
+                console.error(`Error creating chart for '${canvasId}':`, error);
+                showChartError(canvasId);
+                return null;
+            }
+        }
+        
+        function showChartError(canvasId) {
+            const canvas = document.getElementById(canvasId);
+            if (canvas) {
+                const errorDiv = document.createElement('div');
+                errorDiv.className = 'error-message';
+                errorDiv.innerHTML = `
+                    <i class="fas fa-exclamation-triangle"></i>
+                    图表加载失败，请刷新页面重试
+                `;
+                canvas.parentNode.insertBefore(errorDiv, canvas);
+                canvas.style.display = 'none';
+            }
+        }
+        
+        // 图表 - AI市场规模增长趋势
+        const marketGrowthChart = createChartWithErrorHandling('marketGrowthChart', {
+            type: 'line',
+            data: {
+                labels: ['2025', '2026', '2027', '2028', '2029', '2030', '2031', '2032', '2033', '2034'],
+                datasets: [
+                    {
+                        label: '全球AI市场规模（亿美元）',
+                        data: [7575.8, 9034.5, 10776.5, 12857.5, 15344.2, 18321.4, 21884.7, 26152.0, 31271.6, 36804.7],
+                        backgroundColor: 'rgba(49, 130, 206, 0.2)',
+                        borderColor: 'rgba(49, 130, 206, 1)',
+                        borderWidth: 2,
+                        tension: 0.3
+                    },
+                    {
+                        label: '中国AI产业规模（亿元）',
+                        data: [7000, 8400, 10080, 12096, 14515, 17418, 20901, 25081, 30097, 36116],
+                        backgroundColor: 'rgba(99, 102, 241, 0.2)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 2,
+                        tension: 0.3
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: false,
+                        title: {
+                            display: true,
+                            text: '市场规模'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 图表 - AI岗位需求分布
+        const jobDistributionChart = createChartWithErrorHandling('jobDistributionChart', {
+            type: 'pie',
+            data: {
+                labels: ['算法工程师', '机器学习工程师', '深度学习工程师', 'AI系统架构师', '其他'],
+                datasets: [{
+                    data: [35, 25, 15, 10, 15],
+                    backgroundColor: [
+                        'rgba(49, 130, 206, 0.8)',
+                        'rgba(99, 102, 241, 0.8)',
+                        'rgba(56, 161, 105, 0.8)',
+                        'rgba(229, 62, 62, 0.8)',
+                        'rgba(236, 201, 75, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(49, 130, 206, 1)',
+                        'rgba(99, 102, 241, 1)',
+                        'rgba(56, 161, 105, 1)',
+                        'rgba(229, 62, 62, 1)',
+                        'rgba(236, 201, 75, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                return `${label}: ${value}%`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 图表 - AI人才学历要求对比
+        const educationChart = createChartWithErrorHandling('educationChart', {
+            type: 'bar',
+            data: {
+                labels: ['本科以下', '本科', '硕士', '博士'],
+                datasets: [
+                    {
+                        label: 'AI技术职位要求',
+                        data: [2.12, 50.9, 43.2, 3.78],
+                        backgroundColor: 'rgba(49, 130, 206, 0.8)',
+                        borderColor: 'rgba(49, 130, 206, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: '整体职位要求',
+                        data: [64.3, 31.2, 4.1, 0.37],
+                        backgroundColor: 'rgba(99, 102, 241, 0.8)',
+                        borderColor: 'rgba(99, 102, 241, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '百分比 (%)'
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 图表 - AI对就业机会的影响预测
+        const jobImpactChart = createChartWithErrorHandling('jobImpactChart', {
+            type: 'doughnut',
+            data: {
+                labels: ['新创造的工作岗位', '被替代的工作岗位', '净增工作岗位'],
+                datasets: [{
+                    data: [170, 92, 78],
+                    backgroundColor: [
+                        'rgba(56, 161, 105, 0.8)',
+                        'rgba(229, 62, 62, 0.8)',
+                        'rgba(236, 201, 75, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(56, 161, 105, 1)',
+                        'rgba(229, 62, 62, 1)',
+                        'rgba(236, 201, 75, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'right',
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                return `${label}: ${value}百万个`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+        
+        // 图表 - AI开发工具与框架
+        const toolsChart = createChartWithErrorHandling('toolsChart', {
+            type: 'bar',
+            data: {
+                labels: ['Python', 'TensorFlow', 'PyTorch', 'Scikit-learn', 'Keras', 'C++'],
+                datasets: [{
+                    data: [95, 80, 75, 65, 50, 40],
+                    backgroundColor: [
+                        'rgba(49, 130, 206, 0.8)',
+                        'rgba(99, 102, 241, 0.8)',
+                        'rgba(56, 161, 105, 0.8)',
+                        'rgba(229, 62, 62, 0.8)',
+                        'rgba(236, 201, 75, 0.8)',
+                        'rgba(49, 130, 206, 0.8)'
+                    ],
+                    borderColor: [
+                        'rgba(49, 130, 206, 1)',
+                        'rgba(99, 102, 241, 1)',
+                        'rgba(56, 161, 105, 1)',
+                        'rgba(229, 62, 62, 1)',
+                        'rgba(236, 201, 75, 1)',
+                        'rgba(49, 130, 206, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                indexAxis: 'y', // 这会将条形图变为水平方向
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.raw || 0;
+                                return `${label}: ${value}%`;
+                            }
+                        }
+                    }
+                },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '使用率 (%)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: '工具与框架'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
