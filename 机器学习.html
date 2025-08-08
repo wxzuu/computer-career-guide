@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>机器学习基础 - 从入门到理解</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2c3e50',
+                        secondary: '#3498db',
+                        accent: '#6366f1',
+                        dark: '#2d3748',
+                        light: '#f7fafc'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-smooth {
+                transition: all 0.3s ease-in-out;
+            }
+            .card-hover {
+                @apply hover:shadow-lg hover:-translate-y-1 transition-all duration-300;
+            }
+            .section-fade {
+                background: linear-gradient(180deg, rgba(248,250,252,0) 0%, rgba(241,245,249,1) 100%);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans">
+    <!-- 导航栏 -->
+    <header class="sticky top-0 z-50 bg-white shadow-md transition-all duration-300" id="navbar">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-brain text-primary text-2xl"></i>
+                <h1 class="text-xl font-bold text-primary">机器学习基础</h1>
+            </div>
+            
+            <!-- 桌面导航 -->
+            <nav class="hidden md:flex space-x-6">
+                <a href="#intro" class="hover:text-primary transition-smooth">简介</a>
+                <a href="#supervised" class="hover:text-primary transition-smooth">监督学习</a>
+                <a href="#unsupervised" class="hover:text-primary transition-smooth">无监督学习</a>
+                <a href="#semi-supervised" class="hover:text-primary transition-smooth">半监督学习</a>
+                <a href="#reinforcement" class="hover:text-primary transition-smooth">强化学习</a>
+                <a href="#learning-path" class="hover:text-primary transition-smooth">学习路径</a>
+            </nav>
+            
+            <!-- 移动端菜单按钮 -->
+            <button class="md:hidden text-gray-700 focus:outline-none" id="menuBtn">
+                <i class="fa fa-bars text-xl"></i>
+            </button>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div class="md:hidden hidden bg-white w-full border-t" id="mobileMenu">
+            <div class="container mx-auto px-4 py-2 flex flex-col space-y-3">
+                <a href="#intro" class="py-2 hover:text-primary transition-smooth">简介</a>
+                <a href="#supervised" class="py-2 hover:text-primary transition-smooth">监督学习</a>
+                <a href="#unsupervised" class="py-2 hover:text-primary transition-smooth">无监督学习</a>
+                <a href="#semi-supervised" class="py-2 hover:text-primary transition-smooth">半监督学习</a>
+                <a href="#reinforcement" class="py-2 hover:text-primary transition-smooth">强化学习</a>
+                <a href="#learning-path" class="py-2 hover:text-primary transition-smooth">学习路径</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- 英雄区域 -->
+    <section class="bg-gradient-to-r from-blue-50 to-indigo-50 py-16 md:py-24">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 text-dark text-shadow">探索机器学习的世界</h1>
+                <p class="text-xl text-gray-600 mb-8">从基础概念到核心算法，全面了解机器学习的工作原理与应用场景</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <a href="#supervised" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-lg shadow-md transition-smooth">
+                        开始学习 <i class="fa fa-arrow-right ml-2"></i>
+                    </a>
+                    <a href="#learning-path" class="bg-white hover:bg-gray-100 text-primary border border-primary px-6 py-3 rounded-lg shadow-md transition-smooth">
+                        学习路径 <i class="fa fa-road ml-2"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 主要内容 -->
+    <main class="container mx-auto px-4 py-12">
+        <!-- 简介部分 -->
+        <section id="intro" class="mb-16">
+            <div class="max-w-4xl mx-auto">
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold mb-6 text-dark flex items-center">
+                        <i class="fa fa-info-circle text-primary mr-3"></i>简介
+                    </h2>
+                    <p class="text-lg text-gray-700 leading-relaxed">
+                        机器学习是人工智能的一个重要分支，它使计算机能够从数据中学习并改进，而无需显式编程。简单来说，机器学习模型通过分析数据来识别模式，然后利用这些模式进行预测或决策。
+                    </p>
+                    <p class="text-lg text-gray-700 leading-relaxed mt-4">
+                        本页面将介绍机器学习的主要方法，包括监督学习、无监督学习、半监督学习和强化学习，帮助您理解"AI是如何学习的"这一核心问题。
+                    </p>
+                </div>
+                
+                <!-- 机器学习分类概览 -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div class="bg-white rounded-xl shadow p-6 card-hover border-t-4 border-primary">
+                        <div class="text-primary text-3xl mb-4">
+                            <i class="fa fa-check-square-o"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">监督学习</h3>
+                        <p class="text-gray-600">使用带标记的数据进行训练，学习输入到输出的映射关系</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow p-6 card-hover border-t-4 border-secondary">
+                        <div class="text-secondary text-3xl mb-4">
+                            <i class="fa fa-question-circle-o"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">无监督学习</h3>
+                        <p class="text-gray-600">从未标记数据中发现隐藏的模式和结构</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow p-6 card-hover border-t-4 border-primary">
+                        <div class="text-primary text-3xl mb-4">
+                            <i class="fa fa-adjust"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">半监督学习</h3>
+                        <p class="text-gray-600">结合少量标记数据和大量未标记数据进行学习</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow p-6 card-hover border-t-4 border-secondary">
+                        <div class="text-secondary text-3xl mb-4">
+                            <i class="fa fa-gamepad"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">强化学习</h3>
+                        <p class="text-gray-600">通过与环境交互，从奖励中学习最优策略</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 监督学习部分 -->
+        <section id="supervised" class="mb-16 section-fade py-8">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-8 text-dark flex items-center">
+                    <i class="fa fa-check-square-o text-secondary mr-3"></i>
+                    <span class="text-secondary">监督学习</span>
+                </h2>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+                    <p class="text-lg mb-4">
+                        监督学习是最常见的机器学习方法之一，模型通过学习带有标记的训练数据进行预测。训练数据包含输入特征和对应的输出标签。
+                    </p>
+                    <p class="text-lg font-semibold">
+                        目标：找到一个从输入特征到输出标签的映射函数，使得对于新的未见过的输入数据，能够准确的预测出相应的输出。
+                    </p>
+                    
+                    <!-- 监督学习图示 -->
+                    <div class="mt-8 bg-gray-50 p-4 rounded-lg">
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-6">
+                            <div class="text-center">
+                                <div class="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                                    <span class="text-xl">输入特征</span>
+                                </div>
+                                <p class="text-gray-600">例如：房价的面积、位置等</p>
+                            </div>
+                            <i class="fa fa-long-arrow-right text-primary text-2xl"></i>
+                            <div class="text-center">
+                                <div class="w-32 h-32 bg-green-100 rounded-full flex items-center justify-center mb-2">
+                                    <span class="text-xl">模型</span>
+                                </div>
+                                <p class="text-gray-600">例如：线性回归模型</p>
+                            </div>
+                            <i class="fa fa-long-arrow-right text-primary text-2xl"></i>
+                            <div class="text-center">
+                                <div class="w-32 h-32 bg-purple-100 rounded-full flex items-center justify-center mb-2">
+                                    <span class="text-xl">输出标签</span>
+                                </div>
+                                <p class="text-gray-600">例如：预测的房价</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-2xl font-bold mb-6 text-primary">算法</h3>
+                
+                <!-- 线性回归 -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">线性回归</h4>
+                    <p class="mb-4">
+                        用直线关系来描述特征和结果的关联，预测连续值（如房价，温度），是最简单的拟合数据趋势的模型，只适用于特征和标签呈线性关系的场景，输出是连续的数值。
+                    </p>
+                    
+                    <div class="mt-6">
+                        <canvas id="linearRegressionChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 逻辑回归 -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">逻辑回归</h4>
+                    <p class="mb-4">
+                        用概率来分类，预测类别（如是否患病，邮件是否垃圾），本质是把线性回归的结果换成0-1之间的概率，再判断类别。
+                    </p>
+                    
+                    <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                        <p class="italic text-gray-700">
+                            比如医生判断一个人 "是否感冒"，特征可能是 "体温、咳嗽次数"。逻辑回归会先像线性回归一样算出一个 "总分"，再通过一个叫 "Sigmoid" 的 "压缩函数"，把总分变成 0-1 之间的概率（比如 0.8 表示 80% 概率感冒）。最后定一个阈值（比如 0.5）：概率＞0.5 就判为 "感冒"，否则 "不感冒"。
+                        </p>
+                    </div>
+                    
+                    <p class="mb-2">公司筛简历：先给学历、工作经验等打分（线性计算），再把分数转换成 "录用概率"，概率高就发 offer，低就拒绝。</p>
+                    
+                    <div class="mt-6">
+                        <canvas id="logisticRegressionChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <!-- 决策树 -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">决策树</h4>
+                    <p class="mb-4">
+                        像流程图一样做判断（比如 "年龄 > 30？→ 收入 > 5 万？→ 批准贷款"），通过一系列是非判断逐步缩小范围，最终得到结果，优点是易懂，缺点是容易 "钻牛角尖"（过拟合）。
+                    </p>
+                    
+                    <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                        <p class="font-medium mb-2">就像平时判断 "一个水果是不是苹果" 的思考过程：</p>
+                        <ol class="list-decimal list-inside space-y-2 pl-4">
+                            <li>先看颜色：是红色 / 绿色吗？→ 是→下一步；不是→排除。</li>
+                            <li>再看形状：是圆形吗？→ 是→下一步；不是→排除。</li>
+                            <li>最后看味道：甜吗？→ 是→判断为苹果；不是→排除。</li>
+                        </ol>
+                        <p class="mt-2">这个 "颜色→形状→味道" 的判断流程，就是一棵决策树：每个 "判断点" 是树的 "节点"，最终结果是 "叶子"。</p>
+                    </div>
+                    
+                    <p class="font-medium mb-1">关键：</p>
+                    <p class="mb-3">逻辑简单，结果要可以说清为什么这么判断</p>
+                    
+                    <p class="font-medium text-secondary mb-1">缺点：</p>
+                    <p>容易钻牛角尖，比如过度关注细节导致过拟合，比如只认红色圆形甜的是苹果，但有些苹果是黄色的就会判断错</p>
+                    
+                    <!-- 简单决策树图示 -->
+                    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                        <div class="flex flex-col items-center">
+                            <div class="border border-gray-300 rounded-md p-2 mb-2 bg-white shadow-sm">颜色是红/绿吗？</div>
+                            <div class="flex justify-center w-full gap-8">
+                                <div class="flex flex-col items-center">
+                                    <div class="text-sm text-gray-500 mb-1">是</div>
+                                    <div class="border border-gray-300 rounded-md p-2 mb-2 bg-white shadow-sm">形状是圆形吗？</div>
+                                    <div class="flex justify-center w-full gap-4">
+                                        <div class="flex flex-col items-center">
+                                            <div class="text-sm text-gray-500 mb-1">是</div>
+                                            <div class="border border-gray-300 rounded-md p-2 mb-2 bg-white shadow-sm">味道甜吗？</div>
+                                            <div class="flex justify-center w-full gap-4">
+                                                <div>
+                                                    <div class="text-sm text-gray-500 mb-1">是</div>
+                                                    <div class="border border-green-300 bg-green-50 rounded-md p-2 text-green-700">是苹果</div>
+                                                </div>
+                                                <div>
+                                                    <div class="text-sm text-gray-500 mb-1">否</div>
+                                                    <div class="border border-red-300 bg-red-50 rounded-md p-2 text-red-700">不是苹果</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <div class="text-sm text-gray-500 mb-1">否</div>
+                                            <div class="border border-red-300 bg-red-50 rounded-md p-2 text-red-700">不是苹果</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="text-sm text-gray-500 mb-1">否</div>
+                                    <div class="border border-red-300 bg-red-50 rounded-md p-2 text-red-700">不是苹果</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 随机森林 -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">随机森林</h4>
+                    <p class="mb-4">
+                        用多颗决策树的集体智慧提升预测准确率，减少单个树的偏见。属于集成学习（多个弱模型组成强模型），比单棵决策树更准确，更抗干扰（不容易过拟合）。
+                    </p>
+                    
+                    <p class="mb-4">工作界常用（比如风控，推荐系统）</p>
+                    
+                    <p class="mb-4">
+                        每棵树用不同的特征组合（<em>颜色+形状，形状+味道，或随机选择特征</em>），最后对结果投票，避免单个树死磕细节，让整体更稳健。
+                    </p>
+                    
+                    <!-- 随机森林图示 -->
+                    <div class="mt-6 flex flex-col items-center">
+                        <div class="text-center mb-4">
+                            <p class="font-medium">多棵决策树投票决定最终结果</p>
+                        </div>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <div class="border border-gray-200 rounded p-3 bg-gray-50 w-32 text-center">
+                                <p class="text-sm mb-1">决策树1</p>
+                                <p class="font-medium">是苹果</p>
+                            </div>
+                            <div class="border border-gray-200 rounded p-3 bg-gray-50 w-32 text-center">
+                                <p class="text-sm mb-1">决策树2</p>
+                                <p class="font-medium">是苹果</p>
+                            </div>
+                            <div class="border border-gray-200 rounded p-3 bg-gray-50 w-32 text-center">
+                                <p class="text-sm mb-1">决策树3</p>
+                                <p class="font-medium">不是苹果</p>
+                            </div>
+                            <div class="border border-gray-200 rounded p-3 bg-gray-50 w-32 text-center">
+                                <p class="text-sm mb-1">决策树4</p>
+                                <p class="font-medium">是苹果</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center">
+                            <i class="fa fa-long-arrow-down text-primary mr-2"></i>
+                            <div class="border-2 border-primary rounded p-3 bg-primary/10 w-40 text-center">
+                                <p class="font-medium text-primary">最终结果：是苹果（3/4投票）</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 支持向量机 -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">支持向量机（SVM）</h4>
+                    <p class="mb-4">
+                        找一条最优直线分隔两类数据，适合小样本，高维数据（如图像分类，文本分类）。
+                    </p>
+                    
+                    <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                        <p class="italic text-gray-700">
+                            比如区分 "猫和狗" 的图片：特征是 "耳朵形状" "尾巴长度"，把这些特征画在坐标系上，猫的点在左边，狗的在右边。
+                        </p>
+                        <p class="italic text-gray-700 mt-2">
+                            SVM 找的不是随便一条分隔线，而是 "离两边最近的点都最远" 的线 —— 这样即使有一只耳朵稍圆的猫（点稍微右移），也还能被分到猫的一边。
+                        </p>
+                        <p class="italic text-gray-700 mt-2">
+                            如果数据不好分（比如两类点混在一起），SVM还能升维，映射到三维空间，找一个平面分开，再降回二维。
+                        </p>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <canvas id="svmChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <!-- XGBoost/LightGBM -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">XGBoost/LightGBM梯度提升</h4>
+                    <p class="mb-4">
+                        通过多棵弱决策树接力学习，不断修正错误，最终达到高精度（属于梯度提升集成算法）。
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="font-medium mb-2">XGBoost：</p>
+                            <p>更严谨，每一步都精打细算，不容易出错，但速度稍慢</p>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <p class="font-medium mb-2">LightGBM：</p>
+                            <p>用灵活的方式选特征（比如分组选特征），速度更快，适合大数据</p>
+                        </div>
+                    </div>
+                    
+                    <p class="mb-4">在竞赛和实际业务中（比如推荐系统，风控）常用，精度高，速度快</p>
+                    
+                    <p class="italic text-gray-600">
+                        属于黑箱模型，结果解释性差，不知道具体哪棵树起了关键作用，但就是准
+                    </p>
+                    
+                    <!-- 梯度提升图示 -->
+                    <div class="mt-6">
+                        <div class="text-center mb-4">
+                            <p class="font-medium">梯度提升过程：不断修正错误</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="border border-gray-200 rounded p-3 bg-gray-50 w-full max-w-md">
+                                <p class="text-sm mb-1">第一棵树预测：</p>
+                                <p>房价 = 50万（误差：实际60万，差10万）</p>
+                            </div>
+                            <i class="fa fa-long-arrow-down text-primary"></i>
+                            <div class="border border-gray-200 rounded p-3 bg-gray-50 w-full max-w-md">
+                                <p class="text-sm mb-1">第二棵树修正第一棵的错误：</p>
+                                <p>预测误差 = +8万（接近10万的误差）</p>
+                            </div>
+                            <i class="fa fa-long-arrow-down text-primary"></i>
+                            <div class="border border-gray-200 rounded p-3 bg-gray-50 w-full max-w-md">
+                                <p class="text-sm mb-1">第三棵树继续修正：</p>
+                                <p>预测误差 = +2万</p>
+                            </div>
+                            <i class="fa fa-long-arrow-down text-primary"></i>
+                            <div class="border-2 border-primary rounded p-3 bg-primary/10 w-full max-w-md">
+                                <p class="text-sm mb-1">最终预测（总和）：</p>
+                                <p class="font-medium text-primary">50万 + 8万 + 2万 = 60万（准确）</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 监督学习总结 -->
+                <div class="bg-primary/5 rounded-xl p-6 border border-primary/20">
+                    <h4 class="text-xl font-semibold mb-4">Summary</h4>
+                    <p class="mb-3">核心都是从<u>特征-->标签</u>的标注数据中，找到一个<u>稳定的映射规则</u>：</p>
+                    <ul class="list-disc list-inside space-y-2 pl-4">
+                        <li>线性回归/逻辑回归：用<u>数学公式</u>（直线/概率）映射</li>
+                        <li>决策树/随机森林：用<u>判断流程/集体投票</u>映射</li>
+                        <li>SVM：用<u>分隔线</u>映射</li>
+                        <li>XGBoost/LightGBM：用<u>接力纠错</u>映射</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 无监督学习部分 -->
+        <section id="unsupervised" class="mb-16 section-fade py-8">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-8 text-dark flex items-center">
+                    <i class="fa fa-question-circle-o text-secondary mr-3"></i>
+                    <span class="text-secondary">无监督学习</span>
+                </h2>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+                    <p class="text-lg mb-4">
+                        无监督学习是另一种重要的机器学习方法，模型使用未标记的数据进行学习。与监督学习不同，这里的数据只有输入特征，没有对应的输出标签。
+                    </p>
+                    <p class="text-lg font-semibold">
+                        目标：发现数据中的内在结构，模式或规律。
+                    </p>
+                    
+                    <!-- 无监督学习图示 -->
+                    <div class="mt-8 bg-gray-50 p-4 rounded-lg">
+                        <div class="flex flex-col items-center">
+                            <div class="w-64 h-32 bg-blue-100 rounded-lg flex items-center justify-center mb-4">
+                                <span class="text-xl">未标记的数据（只有特征）</span>
+                            </div>
+                            <i class="fa fa-long-arrow-down text-secondary text-2xl mb-4"></i>
+                            <div class="w-64 h-32 bg-green-100 rounded-lg flex items-center justify-center">
+                                <span class="text-xl">发现隐藏的模式和结构</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-2xl font-bold mb-6 text-primary">算法</h3>
+                
+                <!-- K-Means -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">K-Means（K均值分类）</h4>
+                    <p class="mb-4">
+                        把相似的数据分到同一类，不相似的分开，需要提前告诉算法分几堆，让组内数据尽量像，组间尽量不像。
+                    </p>
+                    
+                    <ul class="list-disc list-inside space-y-2 pl-4 mb-4">
+                        <li>客户分群（比如按消费习惯分高，中，低价值客户）</li>
+                        <li>图片压缩（把相似颜色归为一类）</li>
+                    </ul>
+                    
+                    <div class="mt-6">
+                        <canvas id="kmeansChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <!-- DBSCAN -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">DBSCAN（基于密度的聚类）</h4>
+                    <p class="mb-4">
+                        按密集程度抱团。自动找密集区域，如果一堆数据点靠得近就归为一类；孤立的点算异常值，不需要提前指定分几堆。
+                    </p>
+                    
+                    <p class="mb-4">
+                        比K-Means灵活，能处理形状不规则的聚类，还能识别异常数据（比如检测信用卡盗刷，异常交易就是孤立点）
+                    </p>
+                    
+                    <!-- DBSCAN图示 -->
+                    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                        <div class="text-center mb-4">
+                            <p class="font-medium">DBSCAN聚类示例：根据密度自动分组并识别异常点</p>
+                        </div>
+                        <div class="flex justify-center">
+                            <div class="relative w-64 h-64">
+                                <!-- 模拟点集 -->
+                                <div class="absolute top-1/4 left-1/4 w-3 h-3 bg-red-500 rounded-full"></div>
+                                <div class="absolute top-1/4 left-1/3 w-3 h-3 bg-red-500 rounded-full"></div>
+                                <div class="absolute top-1/3 left-1/4 w-3 h-3 bg-red-500 rounded-full"></div>
+                                <div class="absolute top-1/3 left-1/3 w-3 h-3 bg-red-500 rounded-full"></div>
+                                <div class="absolute top-1/4 left-1/2 w-3 h-3 bg-red-500 rounded-full"></div>
+                                
+                                <div class="absolute top-2/3 left-1/4 w-3 h-3 bg-blue-500 rounded-full"></div>
+                                <div class="absolute top-2/3 left-1/3 w-3 h-3 bg-blue-500 rounded-full"></div>
+                                <div class="absolute top-3/4 left-1/4 w-3 h-3 bg-blue-500 rounded-full"></div>
+                                <div class="absolute top-3/4 left-1/3 w-3 h-3 bg-blue-500 rounded-full"></div>
+                                <div class="absolute top-2/3 left-1/2 w-3 h-3 bg-blue-500 rounded-full"></div>
+                                
+                                <div class="absolute top-1/2 right-1/4 w-3 h-3 bg-green-500 rounded-full"></div>
+                                <div class="absolute top-1/2 right-1/5 w-3 h-3 bg-green-500 rounded-full"></div>
+                                <div class="absolute top-5/8 right-1/4 w-3 h-3 bg-green-500 rounded-full"></div>
+                                <div class="absolute top-5/8 right-1/5 w-3 h-3 bg-green-500 rounded-full"></div>
+                                
+                                <!-- 异常点 -->
+                                <div class="absolute top-1/2 left-1/6 w-4 h-4 bg-yellow-500 border-2 border-black rounded-full animate-pulse"></div>
+                                <div class="absolute top-1/6 right-1/6 w-4 h-4 bg-yellow-500 border-2 border-black rounded-full animate-pulse"></div>
+                                
+                                <!-- 聚类圈 -->
+                                <div class="absolute top-1/6 left-1/6 w-32 h-32 border-2 border-red-500 rounded-full opacity-30"></div>
+                                <div class="absolute top-1/2 left-1/6 w-32 h-32 border-2 border-blue-500 rounded-full opacity-30"></div>
+                                <div class="absolute top-1/3 right-1/6 w-24 h-24 border-2 border-green-500 rounded-full opacity-30"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-center gap-8 mt-4 text-sm">
+                            <div class="flex items-center"><span class="w-3 h-3 bg-red-500 rounded-full mr-1"></span> 聚类1</div>
+                            <div class="flex items-center"><span class="w-3 h-3 bg-blue-500 rounded-full mr-1"></span> 聚类2</div>
+                            <div class="flex items-center"><span class="w-3 h-3 bg-green-500 rounded-full mr-1"></span> 聚类3</div>
+                            <div class="flex items-center"><span class="w-3 h-3 bg-yellow-500 rounded-full mr-1"></span> 异常点</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- PCA -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">PCA（主成成分分析）</h4>
+                    <p class="mb-4">
+                        给数据瘦身，把高维数据压缩成低纬度，同时保留最重要的信息，解决数据太多，模型跑不动的问题。
+                    </p>
+                    
+                    <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                        <p class="italic text-gray-700">
+                            比如描述一个水果有大小，颜色，甜度，酸度4个指标，PCA可能发现甜度+酸度可以合并成口感这一指标，大小+颜色可以合并成外观，这样用两个指标就能大致描述水果，既简化了数据，又没丢失关键信息。
+                        </p>
+                    </div>
+                    
+                    <p class="mb-4">
+                        降维后方便可视化（比如把100个特征的数据画在2D图上），去除数据噪音（保留主要旋律，过滤次要干扰）。
+                    </p>
+                    
+                    <div class="mt-6">
+                        <canvas id="pcaChart" width="400" height="200"></canvas>
+                    </div>
+                </div>
+                
+                <!-- LDA -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">LDA（潜在狄利克雷分配）</h4>
+                    <p class="mb-4">
+                        从文本中挖隐藏主题。
+                    </p>
+                    
+                    <p class="mb-4">
+                        假设一篇文章是由几个潜在主题混合而成，LDA会自动通过关键词从一堆文章中找出这些主题。
+                    </p>
+                    
+                    <ul class="list-disc list-inside space-y-2 pl-4 mb-4">
+                        <li>文本分类（自动给文章打标签）</li>
+                        <li>推荐系统（根据用户读的主题推相似内容）</li>
+                    </ul>
+                    
+                    <!-- LDA图示 -->
+                    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                        <div class="text-center mb-4">
+                            <p class="font-medium">LDA主题模型示例</p>
+                        </div>
+                        <div class="flex flex-col md:flex-row justify-center gap-6">
+                            <div class="text-center">
+                                <div class="border border-gray-200 rounded p-3 bg-white mb-2">文章1</div>
+                                <p class="text-sm text-gray-600">"人工智能、神经网络、机器学习、算法..."</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border border-gray-200 rounded p-3 bg-white mb-2">文章2</div>
+                                <p class="text-sm text-gray-600">"深度学习、神经网络、图像识别..."</p>
+                            </div>
+                            <div class="text-center">
+                                <div class="border border-gray-200 rounded p-3 bg-white mb-2">文章3</div>
+                                <p class="text-sm text-gray-600">"足球、世界杯、进球、比赛..."</p>
+                            </div>
+                        </div>
+                        <div class="flex justify-center my-4">
+                            <i class="fa fa-long-arrow-down text-secondary text-2xl"></i>
+                        </div>
+                        <div class="flex flex-col md:flex-row justify-center gap-6">
+                            <div class="border-2 border-blue-500 rounded p-3 bg-blue-50 text-center">
+                                <p class="font-medium text-blue-700">主题1: 人工智能</p>
+                                <p class="text-sm text-gray-600">关键词: 人工智能、机器学习、神经网络、算法、深度学习</p>
+                            </div>
+                            <div class="border-2 border-green-500 rounded p-3 bg-green-50 text-center">
+                                <p class="font-medium text-green-700">主题2: 体育</p>
+                                <p class="text-sm text-gray-600">关键词: 足球、世界杯、进球、比赛、运动员</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 关联规则 -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">关联规则（比如Apriori算法）</h4>
+                    <p class="mb-4">
+                        找数据中的关联关系（规律）。
+                    </p>
+                    
+                    <div class="bg-blue-50 p-4 rounded-lg mb-4">
+                        <p class="italic text-gray-700">
+                            从数据中挖如果A出现，那么B也容易出现的关系，比如超市里买尿布的人常买啤酒。
+                        </p>
+                        <p class="italic text-gray-700 mt-2">
+                            超市购物篮分析，Apriori会统计所有商品的组合出现频率。
+                        </p>
+                        <p class="italic text-gray-700 mt-2">
+                            比如发现买面包+牛奶的人里，80%也会买鸡蛋。
+                        </p>
+                        <p class="italic text-gray-700 mt-2">
+                            这就是一条关联规则：面包+牛奶-->鸡蛋。
+                        </p>
+                    </div>
+                    
+                    <p class="mb-2"><span class="font-medium">支持度：</span>多少人买了这三样</p>
+                    <p class="mb-4"><span class="font-medium">置信度：</span>买了面包牛奶的人里，多少人买了鸡蛋</p>
+                    
+                    <p class="mb-4">
+                        超市货架摆放（把关联商品放在一起），电商推荐（买了这个的人还买了那个）
+                    </p>
+                    
+                    <!-- 关联规则图示 -->
+                    <div class="mt-6">
+                        <div class="text-center mb-4">
+                            <p class="font-medium">购物篮关联规则示例</p>
+                        </div>
+                        <div class="flex flex-wrap justify-center gap-4">
+                            <div class="border border-gray-200 rounded p-3 bg-gray-50 text-center">
+                                <p class="font-medium">尿布</p>
+                                <div class="my-2">
+                                    <i class="fa fa-long-arrow-right text-primary"></i>
+                                </div>
+                                <p class="font-medium text-primary">啤酒</p>
+                                <p class="text-sm mt-1">支持度: 15%</p>
+                                <p class="text-sm">置信度: 70%</p>
+                            </div>
+                            <div class="border border-gray-200 rounded p-3 bg-gray-50 text-center">
+                                <p class="font-medium">面包 + 牛奶</p>
+                                <div class="my-2">
+                                    <i class="fa fa-long-arrow-right text-primary"></i>
+                                </div>
+                                <p class="font-medium text-primary">鸡蛋</p>
+                                <p class="text-sm mt-1">支持度: 20%</p>
+                                <p class="text-sm">置信度: 80%</p>
+                            </div>
+                            <div class="border border-gray-200 rounded p-3 bg-gray-50 text-center">
+                                <p class="font-medium">薯片</p>
+                                <div class="my-2">
+                                    <i class="fa fa-long-arrow-right text-primary"></i>
+                                </div>
+                                <p class="font-medium text-primary">可乐</p>
+                                <p class="text-sm mt-1">支持度: 25%</p>
+                                <p class="text-sm">置信度: 85%</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 无监督学习总结 -->
+                <div class="bg-secondary/5 rounded-xl p-6 border border-secondary/20">
+                    <h4 class="text-xl font-semibold mb-4">Summary</h4>
+                    <p class="mb-3">无监督学习常用场景</p>
+                    <ul class="list-disc list-inside space-y-2 pl-4">
+                        <li>聚类（分群）</li>
+                        <li>降维（简化数据）</li>
+                        <li>挖关联（找隐藏关系）</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 半监督学习部分 -->
+        <section id="semi-supervised" class="mb-16 section-fade py-8">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-8 text-dark flex items-center">
+                    <i class="fa fa-adjust text-purple-500 mr-3"></i>
+                    <span class="text-purple-500">半监督学习</span>
+                </h2>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+                    <p class="text-lg mb-4">
+                        半监督学习结合了监督学习和无监督学习的特点，是介于两者之间的一种学习方式。
+                    </p>
+                    <p class="text-lg mb-4">
+                        模型使用的训练数据中既有少量的标记数据，又有大量的未标记数据。
+                    </p>
+                    <p class="text-lg font-semibold">
+                        目标：利用未标记数据中的信息来辅助学习，以提高标记数据较少情况下的学习性能。
+                    </p>
+                    
+                    <!-- 半监督学习图示 -->
+                    <div class="mt-8 bg-gray-50 p-4 rounded-lg">
+                        <div class="flex flex-col items-center">
+                            <div class="flex flex-wrap justify-center gap-4 mb-6">
+                                <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center border-2 border-blue-500">
+                                    <span class="text-center">少量<br>标记数据</span>
+                                </div>
+                                <div class="w-40 h-40 bg-gray-100 rounded-full flex items-center justify-center border-2 border-gray-400">
+                                    <span class="text-center">大量<br>未标记数据</span>
+                                </div>
+                            </div>
+                            <i class="fa fa-long-arrow-down text-purple-500 text-2xl mb-6"></i>
+                            <div class="w-64 h-32 bg-purple-100 rounded-lg flex items-center justify-center">
+                                <span class="text-xl">半监督学习模型</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-2xl font-bold mb-6 text-primary">算法：</h3>
+                
+                <!-- 半监督SVM -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">半监督SVM（半监督支持向量机）</h4>
+                    <p class="mb-4">
+                        先假设同类数据在空间中是扎堆的，再利用无标注数据的分布来调整分类线。
+                    </p>
+                    
+                    <div class="bg-purple-50 p-4 rounded-lg">
+                        <p class="italic text-gray-700">
+                            识别垃圾邮件时，只有100封标注了是否是垃圾邮件，但有一万没有标注的邮件，此时半监督SVM会结合这一万封邮件的用词规律让分类更准。
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- 标签传播 -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">标签传播（Label Propagation）</h4>
+                    <p class="mb-4">
+                        利用数据间的相似度，让少量标注的标签像水波一样扩散到无标注数据上。
+                    </p>
+                    
+                    <div class="bg-purple-50 p-4 rounded-lg mb-4">
+                        <p class="italic text-gray-700">
+                            例如在社交网络中，已知有三个人喜欢科幻电影，标签传播会计算每个人之间的相似度（比如互动频率高的人相似度高），然后喜欢科幻的标签会慢慢传给和他们关系近的人，最后给大部分人都打上喜欢科幻的标签。
+                        </p>
+                    </div>
+                    
+                    <p class="mb-2">相似度越高，标签传播越流畅</p>
+                    
+                    <p class="font-medium mb-1">应用场景：</p>
+                    <ul class="list-disc list-inside space-y-1 pl-4">
+                        <li>用户兴趣预测（少量用户标注了兴趣，推测其他人）</li>
+                        <li>文本分类（少量标了类别的文章，给大量文章分类）</li>
+                    </ul>
+                    
+                    <!-- 标签传播图示 -->
+                    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                        <div class="text-center mb-4">
+                            <p class="font-medium">标签传播过程示例</p>
+                        </div>
+                        <div class="flex justify-center">
+                            <div class="relative w-80 h-40">
+                                <!-- 初始节点 -->
+                                <div class="absolute top-1/2 left-1/4 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold border-2 border-black">A</div>
+                                <div class="absolute top-1/4 left-1/2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold border-2 border-black">B</div>
+                                <div class="absolute top-3/4 left-1/2 w-8 h-8 bg-red-500 rounded-full flex items-center justify-center text-white font-bold border-2 border-black">C</div>
+                                
+                                <!-- 未标记节点 -->
+                                <div class="absolute top-1/2 left-1/3 w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-800">D</div>
+                                <div class="absolute top-1/3 left-2/3 w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-800">E</div>
+                                <div class="absolute top-2/3 left-2/3 w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-800">F</div>
+                                <div class="absolute top-1/2 right-1/4 w-6 h-6 bg-gray-300 rounded-full flex items-center justify-center text-gray-800">G</div>
+                                
+                                <!-- 连接线 -->
+                                <line x1="80" y1="80" x2="100" y2="80" stroke="gray" stroke-width="1" class="absolute top-0 left-0"></line>
+                                <line x1="100" y1="40" x2="120" y2="60" stroke="gray" stroke-width="1" class="absolute top-0 left-0"></line>
+                                <line x1="100" y1="120" x2="120" y2="100" stroke="gray" stroke-width="1" class="absolute top-0 left-0"></line>
+                                <line x1="120" y1="60" x2="140" y2="80" stroke="gray" stroke-width="1" class="absolute top-0 left-0"></line>
+                                <line x1="120" y1="100" x2="140" y2="80" stroke="gray" stroke-width="1" class="absolute top-0 left-0"></line>
+                                <line x1="140" y1="80" x2="160" y2="80" stroke="gray" stroke-width="1" class="absolute top-0 left-0"></line>
+                                
+                                <!-- 传播箭头（用CSS动画模拟） -->
+                                <div class="absolute top-38 left-80 w-20 h-0 border-t-2 border-dashed border-red-500 animate-dash"></div>
+                                <div class="absolute top-45 left-100 w-0 h-20 border-l-2 border-dashed border-red-500 animate-dash"></div>
+                                <div class="absolute top-75 left-100 w-0 h-20 border-l-2 border-dashed border-red-500 animate-dash"></div>
+                                <div class="absolute top-65 left-120 w-20 h-0 border-t-2 border-dashed border-red-500 animate-dash"></div>
+                                <div class="absolute top-85 left-120 w-20 h-0 border-t-2 border-dashed border-red-500 animate-dash"></div>
+                                <div class="absolute top-38 left-140 w-20 h-0 border-t-2 border-dashed border-red-500 animate-dash"></div>
+                            </div>
+                        </div>
+                        <div class="text-center mt-2 text-sm text-gray-600">
+                            红色节点为已知喜欢科幻电影的用户，标签通过社交关系向周围传播
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 强化学习部分 -->
+        <section id="reinforcement" class="mb-16 section-fade py-8">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-8 text-dark flex items-center">
+                    <i class="fa fa-gamepad text-accent mr-3"></i>
+                    <span class="text-accent">强化学习</span>
+                </h2>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+                    <p class="text-lg mb-4">
+                        强化学习是一种特殊的机器学习方法，智能体（agent）通过与环境进行交互来学习。
+                    </p>
+                    <p class="text-lg mb-4">
+                        智能体在环境中采取行动（actions），环境根据智能体的行动给予奖励（rewards）或惩罚（penalties）。
+                    </p>
+                    <p class="text-lg font-semibold">
+                        目标：通过不断尝试和学习，找到一个策略（policy），使得长期累积的奖励最大化。
+                    </p>
+                    
+                    <!-- 强化学习图示 -->
+                    <div class="mt-8 bg-gray-50 p-4 rounded-lg">
+                        <div class="flex flex-col md:flex-row items-center justify-center gap-6">
+                            <div class="text-center">
+                                <div class="w-32 h-32 bg-yellow-100 rounded-full flex items-center justify-center mb-2">
+                                    <span class="text-xl">智能体</span>
+                                </div>
+                                <p class="text-gray-600">Agent</p>
+                            </div>
+                            <div class="flex flex-col items-center">
+                                <i class="fa fa-long-arrow-right text-accent text-2xl mb-2"></i>
+                                <span class="text-sm">行动</span>
+                                <i class="fa fa-long-arrow-left text-green-500 text-2xl mt-2"></i>
+                                <span class="text-sm">奖励/惩罚</span>
+                            </div>
+                            <div class="text-center">
+                                <div class="w-32 h-32 bg-blue-100 rounded-full flex items-center justify-center mb-2">
+                                    <span class="text-xl">环境</span>
+                                </div>
+                                <p class="text-gray-600">Environment</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="text-2xl font-bold mb-6 text-primary">算法：</h3>
+                
+                <!-- Q-Learning -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">Q-Learning</h4>
+                    <p class="mb-4">
+                        用一个Q表记录在某个状态下做某个动作的价值，通过试错更新Q表（比如游戏里在位置A跳一下的价值是+5）。
+                    </p>
+                    
+                    <div class="bg-red-50 p-4 rounded-lg mb-4">
+                        <p class="italic text-gray-700">
+                            老鼠走迷宫（智能体是老鼠，环境是迷宫），目标是找到奶酪（奖励），碰到墙壁（惩罚）。
+                        </p>
+                    </div>
+                    
+                    <p class="mb-4">
+                        适合状态少的场景（比如简单迷宫），因为Q表需要存每个状态和动作的组合。
+                    </p>
+                    
+                    <!-- Q表示例 -->
+                    <div class="mt-6 overflow-x-auto">
+                        <table class="min-w-full border border-gray-200">
+                            <thead>
+                                <tr class="bg-gray-50">
+                                    <th class="py-2 px-4 border-b text-left">状态\动作</th>
+                                    <th class="py-2 px-4 border-b text-center">上</th>
+                                    <th class="py-2 px-4 border-b text-center">下</th>
+                                    <th class="py-2 px-4 border-b text-center">左</th>
+                                    <th class="py-2 px-4 border-b text-center">右</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="py-2 px-4 border-b">起点</td>
+                                    <td class="py-2 px-4 border-b text-center">0</td>
+                                    <td class="py-2 px-4 border-b text-center">5</td>
+                                    <td class="py-2 px-4 border-b text-center">0</td>
+                                    <td class="py-2 px-4 border-b text-center">0</td>
+                                </tr>
+                                <tr class="bg-gray-50">
+                                    <td class="py-2 px-4 border-b">中间点1</td>
+                                    <td class="py-2 px-4 border-b text-center">0</td>
+                                    <td class="py-2 px-4 border-b text-center">0</td>
+                                    <td class="py-2 px-4 border-b text-center">-10</td>
+                                    <td class="py-2 px-4 border-b text-center">10</td>
+                                </tr>
+                                <tr>
+                                    <td class="py-2 px-4 border-b">中间点2</td>
+                                    <td class="py-2 px-4 border-b text-center">0</td>
+                                    <td class="py-2 px-4 border-b text-center">20</td>
+                                    <td class="py-2 px-4 border-b text-center">5</td>
+                                    <td class="py-2 px-4 border-b text-center">0</td>
+                                </tr>
+                                <tr class="bg-gray-50">
+                                    <td class="py-2 px-4 border-b">终点（奶酪）</td>
+                                    <td class="py-2 px-4 border-b text-center" colspan="4">100（奖励）</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <p class="text-sm text-gray-600 mt-2 text-center">Q表示例：数值越高表示在该状态下执行该动作的价值越大</p>
+                    </div>
+                </div>
+                
+                <!-- DQN -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">DQN（深度Q网络）</h4>
+                    <p class="mb-4">
+                        用神经网络代替Q表。
+                    </p>
+                    
+                    <div class="bg-red-50 p-4 rounded-lg mb-4">
+                        <p class="italic text-gray-700">
+                            如果状态很复杂，比如王者的屏幕上有十个英雄，小兵，血量，状态都是高维图片，Q表根本存不下这么多状态。
+                        </p>
+                        <p class="italic text-gray-700 mt-2">
+                            用神经网络代替Q表，输入当前状态（游戏画面），神经网络直接输出每个动作的Q值（比如向左走的Q值）。
+                        </p>
+                    </div>
+                    
+                    <p class="mb-4">
+                        用深度神经网络处理高维状态，是强化学习从简单游戏走向复杂任务的关键。
+                    </p>
+                    
+                    <!-- DQN图示 -->
+                    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                        <div class="text-center mb-4">
+                            <p class="font-medium">深度Q网络（DQN）结构</p>
+                        </div>
+                        <div class="flex flex-col items-center gap-3">
+                            <div class="border border-gray-200 rounded p-3 bg-white w-full max-w-md text-center">
+                                <p class="text-sm mb-1">输入：游戏画面（状态）</p>
+                                <div class="w-full h-20 bg-gray-200 rounded flex items-center justify-center">
+                                    <i class="fa fa-image text-gray-400 text-2xl"></i>
+                                </div>
+                            </div>
+                            <i class="fa fa-long-arrow-down text-accent"></i>
+                            <div class="border border-gray-200 rounded p-3 bg-white w-full max-w-md text-center">
+                                <p class="text-sm mb-1">神经网络（卷积层+全连接层）</p>
+                                <div class="flex justify-center gap-2 my-2">
+                                    <div class="w-16 h-12 bg-blue-100 rounded flex items-center justify-center text-xs">卷积层</div>
+                                    <div class="w-16 h-12 bg-blue-100 rounded flex items-center justify-center text-xs">池化层</div>
+                                    <div class="w-16 h-12 bg-purple-100 rounded flex items-center justify-center text-xs">全连接层</div>
+                                    <div class="w-16 h-12 bg-purple-100 rounded flex items-center justify-center text-xs">全连接层</div>
+                                </div>
+                            </div>
+                            <i class="fa fa-long-arrow-down text-accent"></i>
+                            <div class="border border-gray-200 rounded p-3 bg-white w-full max-w-md text-center">
+                                <p class="text-sm mb-1">输出：每个动作的Q值</p>
+                                <div class="flex justify-center gap-4 my-2">
+                                    <div class="text-center">
+                                        <p class="text-xs mb-1">上</p>
+                                        <p class="font-medium">Q=8.5</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-xs mb-1">下</p>
+                                        <p class="font-medium">Q=3.2</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-xs mb-1">左</p>
+                                        <p class="font-medium">Q=5.7</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-xs mb-1">右</p>
+                                        <p class="font-medium">Q=9.1</p>
+                                    </div>
+                                    <div class="text-center">
+                                        <p class="text-xs mb-1">攻击</p>
+                                        <p class="font-medium">Q=7.3</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Policy Gradient -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8 card-hover">
+                    <h4 class="text-xl font-semibold mb-4">Policy Gradient（策略梯度）</h4>
+                    <p class="mb-4">
+                        直接学 "怎么做动作"。
+                    </p>
+                    
+                    <p class="mb-4">
+                        和 Q-Learning 的<u>区别</u>：Q-Learning 先学动作的价值，再选价值最高的动作；Policy Gradient 直接学 "策略"—— 在某个状态下，做每个动作的概率（比如在状态 A，有 70% 概率向左，30% 概率向右）。
+                    </p>
+                    
+                    <p class="mb-4">
+                        通过 "奖励反馈" 调整动作概率 —— 如果做完一系列动作后总奖励高，就提高这些动作的概率；奖励低，就降低概率。
+                    </p>
+                    
+                    <p class="mb-4">
+                        适合动作连续的场景（比如机器人走路，动作是 "关节角度" 这种连续值），而 Q-Learning 更适合动作是离散的（比如左 / 右 / 上 / 下）。
+                    </p>
+                    
+                    <!-- 策略梯度图示 -->
+                    <div class="mt-6 bg-gray-50 p-4 rounded-lg">
+                        <div class="text-center mb-4">
+                            <p class="font-medium">策略梯度方法的动作选择概率</p>
+                        </div>
+                        <div class="flex flex-col items-center">
+                            <div class="mb-4">
+                                <p class="text-center mb-2">当前状态：机器人需要向前走</p>
+                                <div class="w-32 h-32 bg-gray-200 rounded-full flex items-center justify-center mx-auto">
+                                    <i class="fa fa-android text-4xl text-gray-600"></i>
+                                </div>
+                            </div>
+                            <div class="w-full max-w-md">
+                                <div class="mb-2 flex justify-between">
+                                    <span>左腿向前</span>
+                                    <span>60%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                                    <div class="bg-green-500 h-2.5 rounded-full" style="width: 60%"></div>
+                                </div>
+                                
+                                <div class="mb-2 flex justify-between">
+                                    <span>右腿向前</span>
+                                    <span>30%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+                                    <div class="bg-green-500 h-2.5 rounded-full" style="width: 30%"></div>
+                                </div>
+                                
+                                <div class="mb-2 flex justify-between">
+                                    <span>停止</span>
+                                    <span>10%</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2.5">
+                                    <div class="bg-green-500 h-2.5 rounded-full" style="width: 10%"></div>
+                                </div>
+                            </div>
+                            <p class="mt-4 text-sm text-gray-600">
+                                如果机器人成功向前走了（获得高奖励），则"左腿向前"的概率会进一步提高
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 强化学习总结 -->
+                <div class="bg-accent/5 rounded-xl p-6 border border-accent/20">
+                    <h4 class="text-xl font-semibold mb-4">Summary</h4>
+                    <p class="font-medium mb-3">常见应用</p>
+                    <ul class="list-disc list-inside space-y-2 pl-4">
+                        <li>
+                            机器人控制（Robot Control）：例如让机器人在未知环境中行走，机器人通过不断地尝试不同的移动方向和速度（行动），根据是否碰撞障碍物或到达目标（奖励）来学习最佳的移动策略。
+                        </li>
+                        <li>
+                            游戏（Games）：例如让智能体学习玩围棋或 Atari 游戏，智能体通过在游戏中采取行动并根据游戏结果（赢或输）获得奖励来学习最佳的游戏策略。
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 学习思路部分 -->
+        <section id="learning-path" class="mb-16">
+            <div class="max-w-4xl mx-auto">
+                <h2 class="text-3xl font-bold mb-8 text-dark flex items-center">
+                    <i class="fa fa-graduation-cap text-primary mr-3"></i>
+                    学习思路与进阶
+                </h2>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+                    <h3 class="text-2xl font-semibold mb-6">学习思路1.0</h3>
+                    <p class="text-lg font-medium mb-4">根据文章分析思路，查漏补缺</p>
+                    
+                    <div class="mb-6">
+                        <a href="https://cloud.tencent.com/developer/article/1940492" target="_blank" class="text-primary hover:underline flex items-center">
+                            <i class="fa fa-external-link mr-2"></i> 强化学习（四）
+                        </a>
+                        <p class="text-sm text-gray-500">来源：cloud.tencent.com</p>
+                    </div>
+                    
+                    <h4 class="text-xl font-semibold mb-3">1. 扎实的强化学习理论基础</h4>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg mb-6 flex justify-center">
+                        <img src="images/image1.png" alt="强化学习理论基础" class="max-w-full h-auto rounded shadow" />
+                    </div>
+                    
+                    <h4 class="text-xl font-semibold mb-3">2. 工程实现能力</h4>
+                    <ul class="list-disc list-inside space-y-2 pl-4 mb-6">
+                        <li>基于<u>TensorFlow</u>构建两层全连接网络，设计合理的<u>输入输出结构</u>（状态特征，动作，汇报值的维度匹配）</li>
+                        <li>针对性设计<u>损失函数</u>（通过负对数似然与折扣回报加权，实现"最大化长期奖励"的目标）</li>
+                        <li>处理<u>实际细节</u>（如回报归一化以稳定训练，动作采样的随机性和确定性选择）</li>
+                        <li><u>深度学习框架</u>（<strong>TensorFlow</strong>）和<u>编程工具</u>（<strong>Python，NumPy</strong>）的熟练掌握</li>
+                    </ul>
+                    
+                    <h4 class="text-xl font-semibold mb-3">3. 问题分析和实验设计能力</h4>
+                    <p class="mb-4">
+                        以<u>CartPole问题</u>为载体，设计"<u>探索-存储-学习</u>"的闭环流程（1000次探索迭代，每次探索结束后更新模型），并通过"累计奖励阈值控制渲染"等细节优化实验过程，体现<u>问题驱动 - 实验验证 - 结果反馈</u>的科学研究思路。
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+                    <h3 class="text-2xl font-semibold mb-6">文章思路</h3>
+                    <p class="mb-4">
+                        从入门强化学习的<strong>经典入门问题CartPole</strong>入手，这类问题状态空间小，目标明确（保持杆子平衡），适合快速验证算法有效性。首先理解<strong>算法核心逻辑</strong>（比如Policy Gradient通过"<strong>策略网络输出动作概率</strong>""<strong>用回报加权更新策略</strong>"），再通过代码实现<strong>关键模块</strong>（网络构建，回报计算，参数更新），在代码中注释<strong>理论依据</strong>（比如"损失函数设计为最小化-(log_p * R)，等价于最大化长期奖励"）。
+                    </p>
+                    <p class="mb-4">
+                        关注<strong>训练稳定性</strong>（如回报归一化），<strong>探索与利用平衡</strong>（动作选择支持随机采样与贪心策略），并通过累计奖励监控训练效果，体现出 "<strong>实验 - 反馈 - 调整</strong>" 的迭代思维。
+                    </p>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+                    <h3 class="text-2xl font-semibold mb-6">如何吃透这系列文章，需要补充什么知识</h3>
+                    
+                    <div class="space-y-6">
+                        <div>
+                            <p class="font-medium text-lg mb-2">1. 强化学习基本概念</p>
+                            <p class="mb-2">（状态，动作，奖励/环境，episode，回报折扣），关键要素</p>
+                        </div>
+                        
+                        <div>
+                            <p class="font-medium text-lg mb-2">2. TensorFlow基础语法</p>
+                            <p>（张量，占位符，神经网络层构建）</p>
+                        </div>
+                        
+                        <div>
+                            <p class="font-medium text-lg mb-2">3. "问题驱动"思路</p>
+                            <p class="mb-3">从 CartPole、MountainCar 等简单环境入手：</p>
+                            <ul class="list-disc list-inside space-y-2 pl-4">
+                                <li>先用简单算法（如随机策略）跑通流程，理解 "环境交互" 逻辑；</li>
+                                <li>再模仿文章实现 Policy Gradient，逐行对照代码理解 "策略网络如何输出动作""回报如何影响参数更新"，并尝试修改参数（如学习率、网络层数）观察效果</li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <p class="font-medium text-lg mb-2">4. 当代码<strong>跑通</strong>后，回头追问 "为什么"：</p>
+                            <ul class="list-disc list-inside space-y-2 pl-4">
+                                <li>为什么要用折扣回报？（因为未来奖励的不确定性，需赋予近期奖励更高权重）；</li>
+                                <li>损失函数为什么是 "负对数似然 × 回报"？（本质是用回报作为 "好坏信号"，强化好动作的概率）。</li>
+                            </ul>
+                            <p class="mt-2">可结合数学推导（如策略梯度定理）加深理论认知</p>
+                        </div>
+                        
+                        <div>
+                            <p class="font-medium text-lg mb-2">5. 按作者 "从<strong>单一</strong>方法到<strong>融合</strong>方法" 的<strong>思路进阶</strong>：</p>
+                            <ul class="list-disc list-inside space-y-2 pl-4">
+                                <li>掌握 Policy Gradient 后，学习价值方法（如 Q-Learning）；</li>
+                                <li>再学习结合型方法（如文章提到的 Actor-Critic），对比不同算法的优缺点（如策略方法的收敛性、价值方法的高估问题）</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                    <h3 class="text-2xl font-semibold mb-6">类似文章</h3>
+                    <p class="mb-4">有关强化学习方面的基础知识。</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <a href="https://cloud.tencent.com/developer/article/1929137" target="_blank" class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-smooth flex items-center">
+                            <i class="fa fa-file-text-o text-primary mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-medium">强化学习系列（一）--基础概念</p>
+                                <p class="text-sm text-gray-500">cloud.tencent.com</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://cloud.tencent.com/developer/article/1931703" target="_blank" class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-smooth flex items-center">
+                            <i class="fa fa-file-text-o text-primary mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-medium">强化学习系列（二）--算法概念</p>
+                                <p class="text-sm text-gray-500">cloud.tencent.com</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://cloud.tencent.com/developer/article/1940491" target="_blank" class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-smooth flex items-center">
+                            <i class="fa fa-file-text-o text-primary mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-medium">强化学习系列（三）-gym介绍和实例</p>
+                                <p class="text-sm text-gray-500">cloud.tencent.com</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://cloud.tencent.com/developer/article/1940492" target="_blank" class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-smooth flex items-center">
+                            <i class="fa fa-file-text-o text-primary mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-medium">强化学习系列（四）-PolicyGradient实例</p>
+                                <p class="text-sm text-gray-500">cloud.tencent.com</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://cloud.tencent.com/developer/article/1948578" target="_blank" class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-smooth flex items-center">
+                            <i class="fa fa-file-text-o text-primary mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-medium">强化学习系列（五）--Actor-Critic实例</p>
+                                <p class="text-sm text-gray-500">cloud.tencent.com</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://cloud.tencent.com/developer/article/1948579" target="_blank" class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-smooth flex items-center">
+                            <i class="fa fa-file-text-o text-primary mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-medium">强化学习系列（六）--Actor-Critic实例二</p>
+                                <p class="text-sm text-gray-500">cloud.tencent.com</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://cloud.tencent.com/developer/article/1970376" target="_blank" class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-smooth flex items-center">
+                            <i class="fa fa-file-text-o text-primary mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-medium">强化学习系列（七）--DDPG</p>
+                                <p class="text-sm text-gray-500">cloud.tencent.com</p>
+                            </div>
+                        </a>
+                        
+                        <a href="https://cloud.tencent.com/developer/article/1970378" target="_blank" class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-smooth flex items-center">
+                            <i class="fa fa-file-text-o text-primary mr-3 text-xl"></i>
+                            <div>
+                                <p class="font-medium">强化学习系列（八）--PPO</p>
+                                <p class="text-sm text-gray-500">cloud.tencent.com</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white py-12">
+        <div class="container mx-auto px-4">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                    <div class="flex items-center mb-6 md:mb-0">
+                        <i class="fa fa-brain text-primary text-3xl mr-3"></i>
+                        <h2 class="text-2xl font-bold">机器学习基础</h2>
+                    </div>
+                    <div class="flex space-x-4">
+                        <a href="#" class="text-gray-300 hover:text-white transition-smooth">
+                            <i class="fa fa-github text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-smooth">
+                            <i class="fa fa-twitter text-2xl"></i>
+                        </a>
+                        <a href="#" class="text-gray-300 hover:text-white transition-smooth">
+                            <i class="fa fa-linkedin text-2xl"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-700 pt-8">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">机器学习方法</h3>
+                            <ul class="space-y-2">
+                                <li><a href="#supervised" class="text-gray-300 hover:text-white transition-smooth">监督学习</a></li>
+                                <li><a href="#unsupervised" class="text-gray-300 hover:text-white transition-smooth">无监督学习</a></li>
+                                <li><a href="#semi-supervised" class="text-gray-300 hover:text-white transition-smooth">半监督学习</a></li>
+                                <li><a href="#reinforcement" class="text-gray-300 hover:text-white transition-smooth">强化学习</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">学习资源</h3>
+                            <ul class="space-y-2">
+                                <li><a href="#learning-path" class="text-gray-300 hover:text-white transition-smooth">学习路径</a></li>
+                                <li><a href="https://cloud.tencent.com/developer/article/1929137" target="_blank" class="text-gray-300 hover:text-white transition-smooth">强化学习基础</a></li>
+                                <li><a href="https://cloud.tencent.com/developer/article/1940492" target="_blank" class="text-gray-300 hover:text-white transition-smooth">算法实例</a></li>
+                            </ul>
+                        </div>
+                        
+                        <div>
+                            <h3 class="text-lg font-semibold mb-4">关于</h3>
+                            <p class="text-gray-300">
+                                本页面提供机器学习基础知识的概览，包括主要学习方法和核心算法，帮助初学者快速入门。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="border-t border-gray-700 mt-8 pt-8 text-center text-gray-400">
+                    <p>&copy; 2023 机器学习基础知识. 保留所有权利.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 返回顶部按钮 -->
+    <button id="backToTop" class="fixed bottom-6 right-6 bg-primary text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center opacity-0 invisible transition-all duration-300 hover:bg-primary/90">
+        <i class="fa fa-arrow-up"></i>
+    </button>
+
+    <script>
+        // 移动端菜单切换
+        document.getElementById('menuBtn').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobileMenu');
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            const backToTop = document.getElementById('backToTop');
+            
+            if (window.scrollY > 100) {
+                navbar.classList.add('py-2', 'shadow-lg');
+                navbar.classList.remove('py-3', 'shadow-md');
+                
+                backToTop.classList.remove('opacity-0', 'invisible');
+                backToTop.classList.add('opacity-100', 'visible');
+            } else {
+                navbar.classList.add('py-3', 'shadow-md');
+                navbar.classList.remove('py-2', 'shadow-lg');
+                
+                backToTop.classList.add('opacity-0', 'invisible');
+                backToTop.classList.remove('opacity-100', 'visible');
+            }
+        });
+        
+        // 返回顶部功能
+        document.getElementById('backToTop').addEventListener('click', function() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
+            });
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                // 关闭移动菜单（如果打开）
+                document.getElementById('mobileMenu').classList.add('hidden');
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // 线性回归图表
+        const linearCtx = document.getElementById('linearRegressionChart').getContext('2d');
+        new Chart(linearCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: '数据点',
+                    data: [
+                        {x: 10, y: 20}, {x: 20, y: 40}, {x: 30, y: 50}, 
+                        {x: 40, y: 45}, {x: 50, y: 60}, {x: 60, y: 80},
+                        {x: 70, y: 75}, {x: 80, y: 90}, {x: 90, y: 100}
+                    ],
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)'
+                }, {
+                    label: '回归线',
+                    type: 'line',
+                    data: [
+                        {x: 5, y: 15}, {x: 95, y: 105}
+                    ],
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: '特征值' } },
+                    y: { title: { display: true, text: '目标值' } }
+                }
+            }
+        });
+        
+        // 逻辑回归图表
+        const logisticCtx = document.getElementById('logisticRegressionChart').getContext('2d');
+        new Chart(logisticCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: '类别 0',
+                    data: [
+                        {x: 1, y: 2}, {x: 2, y: 1}, {x: 3, y: 2}, 
+                        {x: 2, y: 3}, {x: 4, y: 1}
+                    ],
+                    backgroundColor: 'rgba(239, 68, 68, 0.7)'
+                }, {
+                    label: '类别 1',
+                    data: [
+                        {x: 5, y: 6}, {x: 6, y: 5}, {x: 7, y: 7}, 
+                        {x: 8, y: 6}, {x: 7, y: 5}
+                    ],
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)'
+                }, {
+                    label: 'Sigmoid曲线',
+                    type: 'line',
+                    data: [
+                        {x: 0, y: 0.01}, {x: 2, y: 0.12}, {x: 3, y: 0.32},
+                        {x: 4, y: 0.62}, {x: 5, y: 0.82}, {x: 7, y: 0.98}
+                    ],
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: '特征值' } },
+                    y: { title: { display: true, text: '属于类别1的概率' }, min: 0, max: 1 }
+                }
+            }
+        });
+        
+        // SVM图表
+        const svmCtx = document.getElementById('svmChart').getContext('2d');
+        new Chart(svmCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: '猫',
+                    data: [
+                        {x: 1, y: 2}, {x: 2, y: 1}, {x: 3, y: 2}, 
+                        {x: 2, y: 3}, {x: 4, y: 1}
+                    ],
+                    backgroundColor: 'rgba(239, 68, 68, 0.7)'
+                }, {
+                    label: '狗',
+                    data: [
+                        {x: 5, y: 6}, {x: 6, y: 5}, {x: 7, y: 7}, 
+                        {x: 8, y: 6}, {x: 7, y: 5}
+                    ],
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)'
+                }, {
+                    label: '最优分隔线',
+                    type: 'line',
+                    data: [
+                        {x: 0, y: 3.5}, {x: 10, y: 3.5}
+                    ],
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 2,
+                    borderDash: [],
+                    pointRadius: 0,
+                    fill: false
+                }, {
+                    label: '边界线',
+                    type: 'line',
+                    data: [
+                        {x: 0, y: 2.5}, {x: 10, y: 2.5},
+                        {x: 0, y: 4.5}, {x: 10, y: 4.5}
+                    ],
+                    borderColor: 'rgba(59, 130, 246, 0.5)',
+                    borderWidth: 1,
+                    borderDash: [5, 5],
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: '耳朵形状' } },
+                    y: { title: { display: true, text: '尾巴长度' } }
+                }
+            }
+        });
+        
+        // K-Means图表
+        const kmeansCtx = document.getElementById('kmeansChart').getContext('2d');
+        new Chart(kmeansCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: '聚类1',
+                    data: [
+                        {x: 1, y: 2}, {x: 2, y: 1}, {x: 3, y: 2}, 
+                        {x: 2, y: 3}, {x: 1.5, y: 2.5}
+                    ],
+                    backgroundColor: 'rgba(239, 68, 68, 0.7)'
+                }, {
+                    label: '聚类2',
+                    data: [
+                        {x: 5, y: 6}, {x: 6, y: 5}, {x: 7, y: 7}, 
+                        {x: 8, y: 6}, {x: 7, y: 5}
+                    ],
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)'
+                }, {
+                    label: '聚类3',
+                    data: [
+                        {x: 3, y: 8}, {x: 4, y: 7}, {x: 5, y: 9}, 
+                        {x: 4, y: 8}, {x: 5, y: 7}
+                    ],
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)'
+                }, {
+                    label: '质心',
+                    data: [
+                        {x: 2, y: 2}, {x: 7, y: 6}, {x: 4, y: 8}
+                    ],
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    pointRadius: 6,
+                    pointHoverRadius: 8
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: '特征1' } },
+                    y: { title: { display: true, text: '特征2' } }
+                }
+            }
+        });
+        
+        // PCA图表
+        const pcaCtx = document.getElementById('pcaChart').getContext('2d');
+        new Chart(pcaCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: '原始3D数据的2D投影',
+                    data: [
+                        {x: 1, y: 2}, {x: 2, y: 1}, {x: 3, y: 2}, 
+                        {x: 5, y: 6}, {x: 6, y: 5}, {x: 7, y: 7},
+                        {x: 3, y: 8}, {x: 4, y: 7}, {x: 5, y: 9}
+                    ],
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)'
+                }, {
+                    label: '主成分1',
+                    type: 'line',
+                    data: [
+                        {x: 0, y: 0}, {x: 8, y: 8}
+                    ],
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: false
+                }, {
+                    label: '主成分2',
+                    type: 'line',
+                    data: [
+                        {x: 0, y: 8}, {x: 8, y: 0}
+                    ],
+                    borderColor: 'rgba(16, 185, 129, 1)',
+                    borderWidth: 2,
+                    pointRadius: 0,
+                    fill: false
+                }]
+            },
+            options: {
+                scales: {
+                    x: { title: { display: true, text: '主成分1（外观）' } },
+                    y: { title: { display: true, text: '主成分2（口感）' } }
+                }
+            }
+        });
+        
+    // 添加动画样式（修复并增强）
+document.head.insertAdjacentHTML('beforeend', `
+    <style>
+        /* 修复原始动画并添加更丰富的效果 */
+        @keyframes dash {
+            0% {
+                stroke-dasharray: 10, 20;
+                stroke-dashoffset: 0;
+            }
+            100% {
+                stroke-dasharray: 10, 20;
+                stroke-dashoffset: -30;
+            }
+        }
+        
+        .animate-dash {
+            animation: dash 1.5s linear infinite;
+            stroke-linecap: round; /* 使虚线端点更圆润 */
+        }
+        
+        /* 添加标签传播的波纹效果 */
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            70% {
+                transform: scale(1.5);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1);
+                opacity: 0;
+            }
+        }
+        
+        .pulse-effect {
+            position: relative;
+        }
+        
+        .pulse-effect::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 100%;
+            height: 100%;
+            background: currentColor;
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.3;
+            animation: pulse 2s infinite;
+        }
+    </style>
+`);
+
+        
+        // 动画效果
