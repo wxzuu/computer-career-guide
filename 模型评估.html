@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CartPole与强化学习入门</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#2c3e50',
+                        secondary: '#3498db',
+                        accent: '#6366f1',
+                        dark: '#1E293B',
+                        light: '#F8FAFC'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'system-ui', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-all-300 {
+                transition: all 300ms ease-in-out;
+            }
+        }
+    </style>
+    <style>
+        /* 代码高亮样式 */
+        .code-block {
+            position: relative;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        .code-header {
+            background-color: #1E293B;
+            color: #F8FAFC;
+            padding: 0.75rem 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .copy-btn {
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .copy-btn:hover {
+            color: #10B981;
+        }
+        .code-content {
+            background-color: #0F172A;
+            color: #E2E8F0;
+            padding: 1rem;
+            overflow-x: auto;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        .keyword { color: #93C5FD; }
+        .string { color: #A7F3D0; }
+        .comment { color: #94A3B8; }
+        .function { color: #FCD34D; }
+        .variable { color: #FECACA; }
+        .parameter { color: #DDD6FE; }
+        
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1E293B;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748B;
+        }
+    </style>
+</head>
+<body class="bg-light text-dark">
+    <!-- 导航栏 -->
+    <nav class="sticky top-0 z-50 bg-white/90 backdrop-blur-sm shadow-sm">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-2">
+                <i class="fa fa-balance-scale text-primary text-2xl"></i>
+                <span class="font-bold text-xl">CartPole 强化学习</span>
+            </div>
+            <div class="hidden md:flex space-x-6">
+                <a href="#intro" class="hover:text-primary transition-all-300">问题介绍</a>
+                <a href="#algorithm" class="hover:text-primary transition-all-300">算法原理</a>
+                <a href="#implementation" class="hover:text-primary transition-all-300">代码实现</a>
+                <a href="#training" class="hover:text-primary transition-all-300">训练技巧</a>
+                <a href="#evaluation" class="hover:text-primary transition-all-300">模型评估</a>
+                <a href="#resources" class="hover:text-primary transition-all-300">学习资源</a>
+            </div>
+            <button class="md:hidden text-xl">
+                <i class="fa fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- 英雄区域 -->
+    <header class="bg-gradient-to-r from-primary/90 to-accent/90 text-white py-16 md:py-24">
+        <div class="container mx-auto px-4">
+            <div class="max-w-3xl mx-auto text-center">
+                <h1 class="text-4xl md:text-5xl font-bold mb-6 text-shadow">CartPole 与强化学习入门</h1>
+                <p class="text-xl opacity-90 mb-8">从经典控制问题到深度强化学习的实践之旅</p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#implementation" class="bg-white text-primary hover:bg-opacity-90 font-medium px-6 py-3 rounded-lg transition-all-300 shadow-lg">
+                        <i class="fa fa-code mr-2"></i>查看代码实现
+                    </a>
+                    <a href="#evaluation" class="bg-transparent border-2 border-white hover:bg-white/10 font-medium px-6 py-3 rounded-lg transition-all-300">
+                        <i class="fa fa-check-square-o mr-2"></i>学习模型评估
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-12">
+        <!-- 问题介绍 -->
+        <section id="intro" class="mb-20">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-1 bg-primary mr-4"></div>
+                    <h2 class="text-3xl font-bold">CartPole 问题介绍</h2>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="md:w-1/2">
+                            <p class="mb-4">
+                                CartPole（推车立杆）是强化学习领域中最经典的入门问题之一，常被用作验证新算法有效性的基准测试。
+                            </p>
+                            <p class="mb-4">
+                                问题场景非常直观：一辆推车在光滑的轨道上可以左右移动，一根杆子通过铰链连接在推车上，初始时杆子略微倾斜。智能体需要通过施加向左或向右的力来移动推车，目标是使杆子尽可能长时间地保持垂直不倒。
+                            </p>
+                            <p>
+                                这个问题之所以适合入门，是因为它具有<strong>状态空间小</strong>、<strong>目标明确</strong>（保持杆子平衡）和<strong>环境简单</strong>等特点，能够让学习者快速验证算法的有效性。
+                            </p>
+                        </div>
+                        <div class="md:w-1/2">
+                            <div class="bg-gray-100 rounded-lg p-4 h-full flex items-center justify-center">
+                                <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/266019c20d6441069b4c00d6ec7c2ffb.png~tplv-a9rns2rl98-24:720:720.png?rk3s=1fb89129&x-expires=1755163518&x-signature=Q1qJagoeGeSZrDjQ74wgAxK2%2BjY%3D" alt="CartPole问题示意图" class="rounded shadow-md max-w-full h-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all-300">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i class="fa fa-cubes text-primary mr-3"></i>状态空间
+                        </h3>
+                        <p class="mb-2">CartPole环境的状态由4个连续值组成：</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>推车位置 (x)</li>
+                            <li>推车速度 (dx/dt)</li>
+                            <li>杆子角度 (θ)</li>
+                            <li>杆子角速度 (dθ/dt)</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all-300">
+                        <h3 class="text-xl font-semibold mb-4 flex items-center">
+                            <i class="fa fa-arrows-h text-primary mr-3"></i>动作空间
+                        </h3>
+                        <p class="mb-2">智能体可执行的离散动作：</p>
+                        <ul class="list-disc pl-5 space-y-2">
+                            <li>0: 向左移动推车</li>
+                            <li>1: 向右移动推车</li>
+                        </ul>
+                        <p class="mt-4 text-gray-600">每个动作会获得+1的即时奖励，直到杆子倒下或推车超出轨道范围。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 算法原理 -->
+        <section id="algorithm" class="mb-20">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-1 bg-primary mr-4"></div>
+                    <h2 class="text-3xl font-bold">强化学习算法核心</h2>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+                    <h3 class="text-2xl font-semibold mb-6">策略梯度 (Policy Gradient)</h3>
+                    
+                    <p class="mb-4">
+                        策略梯度是解决CartPole等强化学习问题的有效方法之一。与值函数方法（如Q-Learning）不同，策略梯度方法直接参数化并优化策略函数。
+                    </p>
+                    
+                    <div class="bg-gray-50 rounded-lg p-5 mb-6 border-l-4 border-primary">
+                        <p class="italic">
+                            <strong>核心思想：</strong>通过<strong>策略网络输出动作概率</strong>，并根据环境反馈的奖励信号，使用<strong>回报加权更新策略</strong>，使获得高回报的动作更可能被选中。
+                        </p>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6 mb-6">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">策略网络结构</h4>
+                            <p class="mb-2">典型的策略网络包含：</p>
+                            <ul class="list-disc pl-5 space-y-1">
+                                <li>输入层：接收环境状态（4个特征）</li>
+                                <li>隐藏层：1-2层全连接层，使用ReLU激活</li>
+                                <li>输出层：输出每个动作的概率（2个动作）</li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="text-lg font-semibold mb-3">策略优化目标</h4>
+                            <p class="mb-2">目标是最大化累积期望奖励：</p>
+                            <div class="bg-gray-100 p-3 rounded text-center">
+                                J(θ) = E[R<sub>total</sub> | π<sub>θ</sub>]
+                            </div>
+                            <p class="mt-2 text-sm text-gray-600">其中R<sub>total</sub>是总回报，π<sub>θ</sub>是参数为θ的策略</p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-gray-50 rounded-lg p-5 border-l-4 border-accent">
+                        <h4 class="text-lg font-semibold mb-2">策略梯度定理</h4>
+                        <p class="mb-2">策略梯度可以表示为：</p>
+                        <div class="bg-white p-3 rounded text-center mb-2">
+                            ∇<sub>θ</sub>J(θ) ∝ E[Σ<sub>t</sub>∇<sub>θ</sub>logπ<sub>θ</sub>(a<sub>t</sub>|s<sub>t</sub>)·R<sub>t</sub>]
+                        </div>
+                        <p class="text-sm">
+                            这表明我们可以通过采样轨迹，计算每个动作的对数概率梯度，并乘以相应的回报，然后取期望来更新策略参数。
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all-300">
+                        <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                            <i class="fa fa-sitemap text-primary text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-3">策略表示</h3>
+                        <p>使用神经网络直接表示策略函数π(a|s;θ)，输出在给定状态s下选择每个动作a的概率。</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all-300">
+                        <div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
+                            <i class="fa fa-line-chart text-secondary text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-3">回报计算</h3>
+                        <p>计算每个时间步的累积回报，可以使用折扣回报来平衡即时奖励和未来奖励。</p>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all-300">
+                        <div class="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mb-4">
+                            <i class="fa fa-refresh text-accent text-xl"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-3">参数更新</h3>
+                        <p>根据策略梯度定理，使用采样到的轨迹数据更新网络参数，提高高回报动作的概率。</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 代码实现 -->
+        <section id="implementation" class="mb-20">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-1 bg-primary mr-4"></div>
+                    <h2 class="text-3xl font-bold">代码实现</h2>
+                </div>
+                
+                <p class="mb-6 text-lg">
+                    下面是使用PyTorch实现的CartPole问题的策略梯度算法。代码包含了<strong>关键模块</strong>：网络构建、回报计算和参数更新，并在注释中说明了<strong>理论依据</strong>。
+                </p>
+                
+                <!-- 完整代码实现 -->
+                <div class="code-block mb-10">
+                    <div class="code-header">
+                        <span>policy_gradient_cartpole.py</span>
+                        <span class="copy-btn" onclick="copyCode(this)">
+                            <i class="fa fa-copy"></i> 复制代码
+                        </span>
+                    </div>
+                    <div class="code-content">
+                        <pre><span class="keyword">import</span> <span class="variable">gym</span>
+<span class="keyword">import</span> <span class="variable">torch</span>
+<span class="keyword">import</span> <span class="variable">torch.nn</span> <span class="keyword">as</span> <span class="variable">nn</span>
+<span class="keyword">import</span> <span class="variable">torch.optim</span> <span class="keyword">as</span> <span class="variable">optim</span>
+<span class="keyword">import</span> <span class="variable">torch.nn.functional</span> <span class="keyword">as</span> <span class="variable">F</span>
+<span class="keyword">import</span> <span class="variable">numpy</span> <span class="keyword">as</span> <span class="variable">np</span>
+<span class="keyword">import</span> <span class="variable">matplotlib.pyplot</span> <span class="keyword">as</span> <span class="variable">plt</span>
+
+<span class="comment"># 策略网络</span>
+<span class="keyword">class</span> <span class="function">PolicyNetwork</span>(nn.Module):
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="parameter">self</span>, state_dim, action_dim, hidden_dim=<span class="string">64</span>):
+        <span class="keyword">super</span>(PolicyNetwork, self).__init__()
+        <span class="comment"># 简单的两层全连接网络</span>
+        self.fc1 = nn.Linear(state_dim, hidden_dim)
+        self.fc2 = nn.Linear(hidden_dim, action_dim)
+        
+    <span class="keyword">def</span> <span class="function">forward</span>(<span class="parameter">self</span>, x):
+        <span class="comment"># 前向传播计算动作概率分布</span>
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)
+        <span class="keyword">return</span> F.softmax(x, dim=<span class="string">1</span>)  <span class="comment"># 输出动作概率分布</span>
+
+<span class="keyword">class</span> <span class="function">PolicyGradient</span>:
+    <span class="keyword">def</span> <span class="function">__init__</span>(<span class="parameter">self</span>, state_dim, action_dim, hidden_dim=<span class="string">64</span>, lr=<span class="string">1e-3</span>):
+        <span class="comment"># 初始化策略网络</span>
+        self.policy_net = PolicyNetwork(state_dim, action_dim, hidden_dim)
+        <span class="comment"># 定义优化器</span>
+        self.optimizer = optim.Adam(self.policy_net.parameters(), lr=lr)
+        <span class="comment"># 存储每一步的状态、动作和奖励</span>
+        self.states = []
+        self.actions = []
+        self.rewards = []
+        
+    <span class="keyword">def</span> <span class="function">select_action</span>(<span class="parameter">self</span>, state):
+        <span class="comment"># 将状态转换为张量</span>
+        state = torch.tensor(state, dtype=torch.float32).unsqueeze(<span class="string">0</span>)
+        <span class="comment"># 前向传播得到动作概率</span>
+        probs = self.policy_net(state)
+        <span class="comment"># 根据概率分布采样动作（探索）</span>
+        action_dist = torch.distributions.Categorical(probs)
+        action = action_dist.sample()
+        <span class="comment"># 存储状态和动作</span>
+        self.states.append(state)
+        self.actions.append(action)
+        <span class="keyword">return</span> action.item()
+        
+    <span class="keyword">def</span> <span class="function">greedy_action</span>(<span class="parameter">self</span>, state):
+        <span class="comment"># 贪婪选择动作（利用）</span>
+        state = torch.tensor(state, dtype=torch.float32).unsqueeze(<span class="string">0</span>)
+        probs = self.policy_net(state)
+        <span class="keyword">return</span> torch.argmax(probs, dim=<span class="string">1</span>).item()
+        
+    <span class="keyword">def</span> <span class="function">compute_returns</span>(<span class="parameter">self</span>, gamma=<span class="string">0.99</span>):
+        <span class="comment"># 计算折扣累积回报</span>
+        returns = []
+        G = <span class="string">0</span>
+        <span class="comment"># 从后往前计算</span>
+        <span class="keyword">for</span> r <span class="keyword">in</span> reversed(self.rewards):
+            G = r + gamma * G
+            returns.insert(<span class="string">0</span>, G)
+        <span class="comment"># 转换为张量</span>
+        returns = torch.tensor(returns, dtype=torch.float32)
+        <span class="comment"># 回报归一化（提高训练稳定性）</span>
+        returns = (returns - returns.mean()) / (returns.std() + <span class="string">1e-8</span>)
+        <span class="keyword">return</span> returns
+        
+    <span class="keyword">def</span> <span class="function">update</span>(<span class="parameter">self</span>, gamma=<span class="string">0.99</span>):
+        <span class="comment"># 计算回报</span>
+        returns = self.compute_returns(gamma)
+        
+        <span class="comment"># 计算损失</span>
+        loss = <span class="string">0</span>
+        <span class="keyword">for</span> log_prob, G <span class="keyword">in</span> zip(self.get_log_probs(), returns):
+            <span class="comment"># 损失函数设计为最小化-(log_p * R)，等价于最大化长期奖励</span>
+            loss += -log_prob * G
+        
+        <span class="comment"># 梯度下降更新参数</span>
+        self.optimizer.zero_grad()
+        loss.backward()
+        self.optimizer.step()
+        
+        <span class="comment"># 清空存储的轨迹数据</span>
+        self.states.clear()
+        self.actions.clear()
+        self.rewards.clear()
+        
+        <span class="keyword">return</span> loss.item()
+        
+    <span class="keyword">def</span> <span class="function">get_log_probs</span>(<span class="parameter">self</span>):
+        <span class="comment"># 计算每个动作的对数概率</span>
+        log_probs = []
+        <span class="keyword">for</span> state, action <span class="keyword">in</span> zip(self.states, self.actions):
+            probs = self.policy_net(state)
+            action_dist = torch.distributions.Categorical(probs)
+            log_probs.append(action_dist.log_prob(action))
+        <span class="keyword">return</span> log_probs
+
+<span class="keyword">def</span> <span class="function">train</span>(<span class="parameter">env, agent, episodes=300, max_steps=200</span>):
+    <span class="comment"># 记录每一轮的奖励</span>
+    episode_rewards = []
+    
+    <span class="keyword">for</span> episode <span class="keyword">in</span> range(episodes):
+        state = env.reset()
+        <span class="keyword">if</span> isinstance(state, tuple):  <span class="comment"># 处理gym新版本的返回格式</span>
+            state = state[<span class="string">0</span>]
+        total_reward = <span class="string">0</span>
+        
+        <span class="keyword">for</span> step <span class="keyword">in</span> range(max_steps):
+            <span class="comment"># 选择动作（探索）</span>
+            action = agent.select_action(state)
+            <span class="comment"># 执行动作</span>
+            next_state, reward, done, _, _ = env.step(action)
+            <span class="comment"># 存储奖励</span>
+            agent.rewards.append(reward)
+            total_reward += reward
+            state = next_state
+            
+            <span class="keyword">if</span> done:
+                <span class="keyword">break</span>
+        
+        <span class="comment"># 更新策略</span>
+        loss = agent.update()
+        episode_rewards.append(total_reward)
+        
+        <span class="comment"># 打印训练信息</span>
+        <span class="keyword">if</span> (episode + <span class="string">1</span>) % <span class="string">20</span> == <span class="string">0</span>:
+            avg_reward = np.mean(episode_rewards[-<span class="string">10</span>:])
+            print(f"Episode: {episode+1}, Total Reward: {total_reward}, Average Reward: {avg_reward:.2f}")
+    
+    <span class="keyword">return</span> episode_rewards
+
+<span class="keyword">if</span> __name__ == <span class="string">"__main__"</span>:
+    <span class="comment"># 创建环境</span>
+    env = gym.make(<span class="string">"CartPole-v1"</span>)
+    <span class="comment"># 获取状态和动作维度</span>
+    state_dim = env.observation_space.shape[<span class="string">0</span>]
+    action_dim = env.action_space.n
+    <span class="comment"># 创建智能体</span>
+    agent = PolicyGradient(state_dim, action_dim, hidden_dim=<span class="string">64</span>, lr=<span class="string">1e-3</span>)
+    <span class="comment"># 训练智能体</span>
+    rewards = train(env, agent, episodes=<span class="string">300</span>)
+    
+    <span class="comment"># 绘制奖励曲线</span>
+    plt.plot(rewards)
+    plt.title(<span class="string">"Training Rewards"</span>)
+    plt.xlabel(<span class="string">"Episode"</span>)
+    plt.ylabel(<span class="string">"Total Reward"</span>)
+    plt.show()
+    
+    <span class="comment"># 关闭环境</span>
+    env.close()</pre>
+                    </div>
+                </div>
+                
+                <!-- 关键模块解析 -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                    <h3 class="text-2xl font-semibold mb-6">关键模块解析</h3>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <h4 class="text-xl font-semibold mb-3 text-primary">1. 策略网络构建</h4>
+                            <p class="mb-4">
+                                策略网络是一个简单的两层全连接神经网络，输入是环境状态（4个维度），输出是两个动作的概率分布。网络使用ReLU作为激活函数，最后通过softmax函数将输出转换为概率分布。
+                            </p>
+                            <p>
+                                这种设计能够有效地将状态空间映射到动作空间，适合CartPole这类状态空间较小的问题。对于更复杂的问题，可以增加网络深度和宽度。
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-xl font-semibold mb-3 text-primary">2. 回报计算</h4>
+                            <p class="mb-4">
+                                回报计算采用折扣累积回报的方式，从后往前计算每个时间步的累积奖励：
+                            </p>
+                            <div class="bg-gray-100 p-3 rounded text-center mb-4">
+                                G<sub>t</sub> = r<sub>t</sub> + γ·r<sub>t+1</sub> + γ²·r<sub>t+2</sub> + ... + γ<sup>T-t-1</sup>·r<sub>T-1</sub>
+                            </div>
+                            <p>
+                                其中γ是折扣因子（0 < γ ≤ 1），用于平衡即时奖励和未来奖励。计算得到的回报会进行归一化处理，这有助于提高<strong>训练稳定性</strong>，减少不同轨迹间回报差异过大带来的影响。
+                            </p>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-xl font-semibold mb-3 text-primary">3. 参数更新</h4>
+                            <p class="mb-4">
+                                参数更新基于策略梯度定理，损失函数定义为负的对数概率与回报的乘积之和：
+                            </p>
+                            <div class="bg-gray-100 p-3 rounded text-center mb-4">
+                                Loss = -Σ(logπ<sub>θ</sub>(a<sub>t</sub>|s<sub>t</sub>)·G<sub>t</sub>)
+                            </div>
+                            <p>
+                                最小化这个损失函数等价于最大化累积期望奖励，这是策略梯度方法的核心。通过梯度下降算法更新网络参数，使高回报的动作在未来更可能被选中。
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 训练技巧 -->
+        <section id="training" class="mb-20">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-1 bg-primary mr-4"></div>
+                    <h2 class="text-3xl font-bold">训练技巧与注意事项</h2>
+                </div>
+                
+                <div class="grid md:grid-cols-2 gap-8 mb-10">
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                        <div class="h-48 bg-gradient-to-r from-primary to-accent flex items-center justify-center">
+                            <i class="fa fa-balance-scale text-white text-6xl"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-4">探索与利用平衡</h3>
+                            <p class="mb-3">
+                                在强化学习中，<strong>探索与利用平衡</strong>是一个关键挑战：
+                            </p>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fa fa-search text-primary mt-1 mr-2"></i>
+                                    <span><strong>探索</strong>：尝试新的动作，可能发现更好的策略</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa fa-check-circle text-secondary mt-1 mr-2"></i>
+                                    <span><strong>利用</strong>：选择当前认为最优的动作，获得稳定奖励</span>
+                                </li>
+                            </ul>
+                            <p class="mt-4">
+                                代码中通过基于概率分布采样动作实现探索，通过贪婪选择动作实现利用，在训练阶段以探索为主，测试阶段以利用为主。
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden">
+                        <div class="h-48 bg-gradient-to-r from-secondary to-primary flex items-center justify-center">
+                            <i class="fa fa-line-chart text-white text-6xl"></i>
+                        </div>
+                        <div class="p-6">
+                            <h3 class="text-xl font-semibold mb-4">训练稳定性提升</h3>
+                            <p class="mb-3">
+                                策略梯度方法可能存在训练不稳定的问题，可以通过以下方法改善：
+                            </p>
+                            <ul class="space-y-2">
+                                <li class="flex items-start">
+                                    <i class="fa fa-balance-scale text-accent mt-1 mr-2"></i>
+                                    <span><strong>回报归一化</strong>：减少不同轨迹间的回报差异</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa fa-random text-accent mt-1 mr-2"></i>
+                                    <span><strong>策略熵正则化</strong>：鼓励探索，增加策略的随机性</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa fa-sliders text-accent mt-1 mr-2"></i>
+                                    <span><strong>学习率调度</strong>：初始使用较大学习率，后期逐渐减小</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                    <h3 class="text-2xl font-semibold mb-6">实验-反馈-调整的迭代思维</h3>
+                    
+                    <div class="mb-8">
+                        <p class="mb-4">
+                            强化学习的训练过程是一个<strong>"实验-反馈-调整"</strong>的迭代过程，建议遵循以下步骤：
+                        </p>
+                        
+                        <div class="relative">
+                            <!-- 时间线 -->
+                            <div class="absolute left-4 md:left-1/2 top-0 bottom-0 w-0.5 bg-gray-200 transform md:translate-x-px"></div>
+                            
+                            <!-- 步骤1 -->
+                            <div class="relative pl-12 md:pl-0 md:flex md:items-center mb-8">
+                                <div class="md:absolute md:left-1/2 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center transform md:-translate-x-1/2">1</div>
+                                <div class="md:w-1/2 md:pr-8 md:text-right">
+                                    <h4 class="text-lg font-semibold mb-1">设计实验</h4>
+                                    <p class="text-gray-600">
+                                        设定明确的实验目标和评价指标（如平均奖励、收敛速度等），选择合适的超参数初始值。
+                                    </p>
+                                </div>
+                                <div class="hidden md:block md:w-1/2 md:pl-8"></div>
+                            </div>
+                            
+                            <!-- 步骤2 -->
+                            <div class="relative pl-12 md:pl-0 md:flex md:items-center mb-8">
+                                <div class="md:absolute md:left-1/2 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center transform md:-translate-x-1/2">2</div>
+                                <div class="hidden md:block md:w-1/2 md:pr-8"></div>
+                                <div class="md:w-1/2 md:pl-8">
+                                    <h4 class="text-lg font-semibold mb-1">执行实验并收集数据</h4>
+                                    <p class="text-gray-600">
+                                        运行训练过程，记录关键指标（如每轮奖励、损失值等），可以使用滑动平均来平滑奖励曲线。
+                                    </p>
+                                </div>
+                            </div>
+                            
+                            <!-- 步骤3 -->
+                            <div class="relative pl-12 md:pl-0 md:flex md:items-center mb-8">
+                                <div class="md:absolute md:left-1/2 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center transform md:-translate-x-1/2">3</div>
+                                <div class="md:w-1/2 md:pr-8 md:text-right">
+                                    <h4 class="text-lg font-semibold mb-1">分析结果与反馈</h4>
+                                    <p class="text-gray-600">
+                                        分析训练曲线，判断是否收敛、是否存在不稳定现象、是否过拟合等，找出可能的问题点。
+                                    </p>
+                                </div>
+                                <div class="hidden md:block md:w-1/2 md:pl-8"></div>
+                            </div>
+                            
+                            <!-- 步骤4 -->
+                            <div class="relative pl-12 md:pl-0 md:flex md:items-center">
+                                <div class="md:absolute md:left-1/2 w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center transform md:-translate-x-1/2">4</div>
+                                <div class="hidden md:block md:w-1/2 md:pr-8"></div>
+                                <div class="md:w-1/2 md:pl-8">
+                                    <h4 class="text-lg font-semibold mb-1">调整策略并重复</h4>
+                                    <p class="text-gray-600">
+                                        根据分析结果调整超参数（如学习率、网络结构、折扣因子等）或算法细节，重复实验过程，直到达到预期目标。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 训练效果可视化 -->
+                    <div>
+                        <h4 class="text-xl font-semibold mb-4">训练效果监控</h4>
+                        <p class="mb-4">
+                            通过累计奖励监控训练效果是最直观的方式。一个训练良好的CartPole智能体应该能够逐渐增加每轮的奖励值，最终达到环境的最大步数（CartPole-v1为500步）。
+                        </p>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <canvas id="rewardChart" height="250"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 模型评估 -->
+        <section id="evaluation" class="mb-20">
+            <div class="max-w-4xl mx-auto">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-1 bg-primary mr-4"></div>
+                    <h2 class="text-3xl font-bold">强化学习模型评估</h2>
+                </div>
+                
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+                    <div class="flex flex-col md:flex-row gap-8">
+                        <div class="md:w-1/2">
+                            <h3 class="text-2xl font-semibold mb-4">为什么模型评估至关重要？</h3>
+                            <p class="mb-4">
+                                在强化学习中，模型评估不仅是衡量算法性能的手段，更是指导算法改进的依据。与监督学习不同，强化学习的评估面临着独特的挑战：
+                            </p>
+                            <ul class="space-y-2 mb-4">
+                                <li class="flex items-start">
+                                    <i class="fa fa-exclamation-circle text-accent mt-1 mr-2"></i>
+                                    <span>奖励信号通常是延迟的，难以直接关联到具体动作</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa fa-exclamation-circle text-accent mt-1 mr-2"></i>
+                                    <span>环境动态可能存在随机性，导致评估结果不稳定</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fa fa-exclamation-circle text-accent mt-1 mr-2"></i>
+                                    <span>智能体行为会影响环境状态，形成复杂的反馈 loop</span>
+                                </li>
+                            </ul>
+                            <p>
+                                因此，建立科学、全面的评估体系对于验证算法有效性、比较不同方法以及指导实际应用都具有重要意义。
+                            </p>
+                        </div>
+                        <div class="md:w-1/2">
+                            <div class="bg-gray-100 rounded-lg p-4 h-full flex items-center justify-center">
+                                <img src="https://p3-flow-imagex-sign.byteimg.com/tos-cn-i-a9rns2rl98/903f238282984cb9aac942b8a0165540.png~tplv-a9rns2rl98-24:720:720.png?rk3s=1fb89129&x-expires=1755223660&x-signature=ML0PV7arcFaa6GVQ5p8l3s3NrHs%3D" alt="强化学习模型评估框架" class="rounded shadow-md max-w-full h-auto">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 评估指标 -->
+                <div class="mb-10">
+                    <h3 class="text-2xl font-semibold mb-6">核心评估指标</h3>
+                     
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all-300">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                                <i class="fa fa-trophy text-primary text-xl"></i>
+                            </div>
+                            <h4 class="text-xl font-semibold mb-3">累积奖励 (Cumulative Reward)</h4>
+                            <p class="mb-3">
+                                最常用的评估指标，指智能体在一个完整 episode 中获得的总奖励：
+                            </p>
+                            <div class="bg-gray-50 p-3 rounded text-center mb-3">
+                                R<sub>total</sub> = Σ<sub>t=0</sub><sup>T-1</sup> r<sub>t</sub>
+                            </div>
+                            <p class="text-sm text-gray-600">
+                                在CartPole任务中，累积奖励直接反映了杆子保持平衡的时间长度，最大值为500（环境终止条件）。
+                            </p>
+                        </div>
+                         
+                        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all-300">
+                            <div class="w-12 h-12 bg-secondary/10 rounded-full flex items-center justify-center mb-4">
+                                <i class="fa fa-balance-scale text-secondary text-xl"></i>
+                            </div>
+                            <h4 class="text-xl font-semibold mb-3">稳定性 (Stability)</h4>
+                            <p class="mb-3">
+                                衡量智能体性能的一致性，通常用多次评估的奖励标准差表示：
+                            </p>
+                            <div class="bg-gray-50 p-3 rounded text-center mb-3">
+                                σ = √(Var(R<sub>total</sub>))
+                            </div>
+                            <p class="text-sm text-gray-600">
+                                低标准差表示智能体行为更稳定可靠，这在实际应用中往往与高平均奖励同样重要。
+                            </p>
+                        </div>
+                         
+                        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all-300">
+                            <div class="w-12 h-12 bg-accent/10 rounded-full flex items-center justify-center mb-4">
+                                <i class="fa fa-bolt text-accent text-xl"></i>
+                            </div>
+                            <h4 class="text-xl font-semibold mb-3">学习速度 (Learning Speed)</h4>
+                            <p class="mb-3">
+                                衡量智能体达到预设性能水平所需的训练样本或 episode 数量：
+                            </p>
+                            <ul class="list-disc pl-5 space-y-1 text-sm">
+                                <li>达到最大奖励80%所需的 episode 数</li>
+                                <li>收敛到稳定性能所需的总时间步</li>
+                                <li>每单位奖励所需的计算资源</li>
+                            </ul>
+                        </div>
+                         
+                        <div class="bg-white rounded-xl shadow-md p-6 hover:shadow-lg transition-all-300">
+                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mb-4">
+                                <i class="fa fa-random text-primary text-xl"></i>
+                            </div>
+                            <h4 class="text-xl font-semibold mb-3">鲁棒性 (Robustness)</h4>
+                            <p class="mb-3">
+                                衡量智能体在环境变化或扰动下保持性能的能力：
+                            </p>
+                            <ul class="list-disc pl-5 space-y-1 text-sm">
+                                <li>对初始状态变化的适应能力</li>
+                                <li>对环境参数扰动的抵抗能力</li>
+                                <li>在训练未见过的场景中的表现</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 补充模型评估基础概念 -->
+                <div class="mb-10">
+                    <h3 class="text-2xl font-semibold mb-6">模型评估基础概念</h3>
+
+                    <!-- 交叉验证 -->
+                    <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8">
+                        <h4 class="text-xl font-semibold mb-4 text-primary">交叉验证：避免一次考试定终身</h4>
+                        <p class="mb-4">
+                            交叉验证是一种通过多次划分训练集和测试集来评估模型的方法，目的是减少数据划分的随机性对评估结果的影响。
+                        </p>
+
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-2">K折交叉验证（最常用）</h5>
+                                <p class="text-sm">
+                                    把数据分成K份，每次用K-1份当训练集，1份当测试集，重复K次（每次换不同的测试集），最后计算K次评估结果的平均值。
+                                </p>
+                                <div class="mt-3 p-2 bg-white rounded border border-gray-200">
+                                    <p class="text-sm text-center italic">
+                                        就像学生做K套模拟题，每套题都有不同的侧重，最后取平均成绩更能反映真实水平。
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-2">留一交叉验证</h5>
+                                <p class="text-sm">
+                                    极端情况（K=样本数），每次只能留1个样本当测试集，适合数据量极小的场景（但计算量大）。
+                                </p>
+                                <div class="mt-3 p-2 bg-white rounded border border-gray-200">
+                                    <p class="text-sm text-center italic">
+                                        就像老师给每个学生单独出一道题，虽然全面但工作量巨大。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 混淆矩阵 -->
+                    <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8">
+                        <h4 class="text-xl font-semibold mb-4 text-primary">混淆矩阵：分类任务的错题本</h4>
+                        <p class="mb-4">
+                            混淆矩阵以表格形式展示分类模型的预测结果，帮助我们理解模型在哪里犯了错误。
+                        </p>
+
+                        <div class="overflow-x-auto mb-6">
+                            <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left border-b">实际类别\预测类别</th>
+                                        <th class="py-3 px-4 text-left border-b">正例</th>
+                                        <th class="py-3 px-4 text-left border-b">反例</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td class="py-3 px-4 border-b font-medium">正例</td>
+                                        <td class="py-3 px-4 border-b text-green-600 font-medium">真正例(TP)</td>
+                                        <td class="py-3 px-4 border-b text-red-600 font-medium">假反例(FN)</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="py-3 px-4 border-b font-medium">反例</td>
+                                        <td class="py-3 px-4 border-b text-red-600 font-medium">假正例(FP)</td>
+                                        <td class="py-3 px-4 border-b text-green-600 font-medium">真反例(TN)</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-2">准确率（Accuracy）</h5>
+                                <p class="text-sm mb-2">所有预测中正确的比例：</p>
+                                <div class="bg-white p-2 rounded text-center mb-2">
+                                    (TP + TN) / (TP + TN + FP + FN)
+                                </div>
+                                <p class="text-xs text-gray-600 italic">
+                                    注意：在数据不平衡时可能产生误导。比如1000人中只有1人患病，模型全预测"健康"，准确率也有99.9%，但漏诊了唯一的患者。
+                                </p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-2">精确率（查准率）</h5>
+                                <p class="text-sm mb-2">预测为正例的样本中，实际确实是正例的比例：</p>
+                                <div class="bg-white p-2 rounded text-center mb-2">
+                                    TP / (TP + FP)
+                                </div>
+                                <p class="text-xs text-gray-600 italic">
+                                    适用于"误判代价高"的任务，如垃圾邮件检测（误判正常邮件为垃圾邮件的代价高）。
+                                </p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-2">召回率（查全率）</h5>
+                                <p class="text-sm mb-2">实际正例中被正确预测的比例：</p>
+                                <div class="bg-white p-2 rounded text-center mb-2">
+                                    TP / (TP + FN)
+                                </div>
+                                <p class="text-xs text-gray-600 italic">
+                                    适用于"漏检代价高"的任务，如癌症检测（漏诊的代价高）。
+                                </p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-2">F1分数</h5>
+                                <p class="text-sm mb-2">精确率和召回率的调和平均：</p>
+                                <div class="bg-white p-2 rounded text-center mb-2">
+                                    2 * (精确率 * 召回率) / (精确率 + 召回率)
+                                </div>
+                                <p class="text-xs text-gray-600 italic">
+                                    综合考虑精确率和召回率，当两者此消彼长时（如调整分类阈值），F1分数是更好的指标。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ROC曲线和AUC -->
+                    <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-8">
+                        <h4 class="text-xl font-semibold mb-4 text-primary">ROC曲线和AUC：模型的区分能力</h4>
+                        <p class="mb-4">
+                            ROC曲线（受试者工作特征曲线）和AUC（曲线下面积）用于评估模型对正负例的整体区分能力，不依赖具体的分类阈值。
+                        </p>
+
+                        <div class="grid md:grid-cols-2 gap-6 mb-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-2">ROC曲线</h5>
+                                <p class="text-sm mb-2">以假阳性率(FPR)为横轴，真阳性率(TPR)为纵轴，在不同分类阈值下绘制的曲线。</p>
+                                <ul class="list-disc pl-5 space-y-1 text-xs text-gray-600">
+                                    <li>FPR（假阳性率）：实际负例中被错判为正例的比例</li>
+                                    <li>TPR（真阳性率）：即召回率，实际正例中被正确预测的比例</li>
+                                    <li>曲线越靠近左上角，模型区分能力越强</li>
+                                </ul>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-2">AUC（曲线下面积）</h5>
+                                <p class="text-sm mb-2">ROC曲线下的面积，取值范围0~1。</p>
+                                <ul class="list-disc pl-5 space-y-1 text-xs text-gray-600">
+                                    <li>AUC=1：完美区分（所有正例的预测分数都高于负例）</li>
+                                    <li>AUC=0.5：和随机猜测一样（毫无区分能力）</li>
+                                    <li>AUC>0.5：有一定区分能力，越接近1越好</li>
+                                    <li>对阈值不敏感，在数据不平衡时仍有效</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 超参数调优 -->
+                    <div class="bg-white rounded-xl shadow-md p-6 md:p-8">
+                        <h4 class="text-xl font-semibold mb-4 text-primary">超参数调优：给模型调配方</h4>
+                        <p class="mb-4">
+                            超参数是训练前手动设置的参数（如决策树的最大深度），直接影响模型性能。超参数调优的目的是找到最优超参数组合，让模型在验证集上性能最好。
+                        </p>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-2">网格搜索（Grid Search）</h5>
+                                <p class="text-sm mb-2">穷举所有预设的超参数组合，逐一训练模型并评估，选择性能最好的组合。</p>
+                                <div class="mt-3 p-2 bg-white rounded border border-gray-200 text-sm italic">
+                                    就像调咖啡时尝试所有可能的水温（80℃/90℃）和粉水比（1:15/1:17）组合，选最好喝的那个。
+                                </div>
+                                <p class="mt-3 text-xs text-gray-600">
+                                    <strong>优点：</strong>简单直观，能找到全局最优<br>
+                                    <strong>缺点：</strong>参数多的时候计算量爆炸
+                                </p>
+                            </div>
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h5 class="font-semibold mb-2">贝叶斯优化</h5>
+                                <p class="text-sm mb-2">基于贝叶斯概率，根据之前的超参数组合性能，推测哪些参数更可能带来好结果，优先尝试这些组合。</p>
+                                <div class="mt-3 p-2 bg-white rounded border border-gray-200 text-sm italic">
+                                    就像调咖啡时，第一次试80℃+1:15觉得太淡，第二次试90℃+1:15觉得有点苦，下次就会尝试90℃+1:16，而不是盲目试所有组合。
+                                </div>
+                                <p class="mt-3 text-xs text-gray-600">
+                                    <strong>优点：</strong>比网格搜索高效，适合参数多、训练成本高的场景<br>
+                                    <strong>缺点：</strong>可能陷入局部最优
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 评估方法与工具 -->
+                <div class="bg-white rounded-xl shadow-md p-6 md:p-8 mb-10">
+                    <h3 class="text-2xl font-semibold mb-6">评估方法与最佳实践</h3>
+                    
+                    <div class="space-y-8">
+                        <div>
+                            <h4 class="text-xl font-semibold mb-3 text-primary">1. 离线评估 vs 在线评估</h4>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold mb-2 flex items-center">
+                                        <i class="fa fa-database text-primary mr-2"></i>离线评估
+                                    </h5>
+                                    <p class="text-sm mb-2">
+                                        使用固定的策略和预先收集的轨迹数据进行评估：
+                                    </p>
+                                    <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                                        <li>计算效率高，可重复进行</li>
+                                        <li>不会干扰实际环境</li>
+                                        <li>可能存在分布偏移问题</li>
+                                    </ul>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold mb-2 flex items-center">
+                                        <i class="fa fa-refresh text-primary mr-2"></i>在线评估
+                                    </h5>
+                                    <p class="text-sm mb-2">
+                                        让智能体直接与环境交互进行评估：
+                                    </p>
+                                    <ul class="list-disc pl-5 space-y-1 text-sm text-gray-600">
+                                        <li>评估结果更真实可靠</li>
+                                        <li>可以捕捉环境动态变化</li>
+                                        <li>成本较高，可能不稳定</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-xl font-semibold mb-3 text-primary">2. 统计显著性测试</h4>
+                            <p class="mb-4">
+                                由于强化学习评估存在随机性，直接比较平均奖励可能导致错误结论。需要进行统计显著性测试：
+                            </p>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold mb-2">t检验</h5>
+                                    <p class="text-sm text-gray-600">比较两组评估结果的均值是否存在显著差异</p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold mb-2">Bootstrap</h5>
+                                    <p class="text-sm text-gray-600">通过重采样估计统计量的分布，计算置信区间</p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h5 class="font-semibold mb-2">Mann-Whitney</h5>
+                                    <p class="text-sm text-gray-600">非参数检验，适用于非正态分布的数据</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 class="text-xl font-semibold mb-3 text-primary">3. 评估可视化工具</h4>
+                            <p class="mb-4">
+                                有效的可视化可以帮助理解模型行为和性能特征：
+                            </p>
+                            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                    <i class="fa fa-line-chart text-2xl text-primary mb-2"></i>
+                                    <p class="text-sm font-medium">奖励曲线</p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                    <i class="fa fa-boxplot text-2xl text-primary mb-2"></i>
+                                    <p class="text-sm font-medium">奖励分布</p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                    <i class="fa fa-play-circle text-2xl text-primary mb-2"></i>
+                                    <p class="text-sm font-medium">行为录像</p>
+                                </div>
+                                <div class="bg-gray-50 p-4 rounded-lg text-center">
+                                    <i class="fa fa-heatmap text-2xl text-primary mb-2"></i>
+                                    <p class="text-sm font-medium">状态访问热图</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 评估代码实现 -->
+                <div>
+                    <h3 class="text-2xl font-semibold mb-6">CartPole模型评估代码实现</h3>
+                    
+                    <div class="code-block mb-6">
+                        <div class="code-header">
+                            <span>evaluate_agent.py</span>
+                            <span class="copy-btn" onclick="copyCode(this)">
+                                <i class="fa fa-copy"></i> 复制代码
+                            </span>
+                        </div>
+                        <div class="code-content">
+                            <pre><span class="keyword">import</span> <span class="variable">gym</span>
+<span class="keyword">import</span> <span class="variable">torch</span>
+<span class="keyword">import</span> <span class="variable">numpy</span> <span class="keyword">as</span> <span class="variable">np</span>
+<span class="keyword">import</span> <span class="variable">matplotlib.pyplot</span> <span class="keyword">as</span> <span class="variable">plt</span>
+<span class="keyword">from</span> <span class="variable">scipy</span>.<span class="variable">stats</span> <span class="keyword">import</span> <span class="variable">ttest_ind</span>
+
+<span class="comment"># 评估函数：使用贪婪策略执行多个episode</span>
+<span class="keyword">def</span> <span class="function">evaluate</span>(<span class="parameter">env, agent, episodes=100, max_steps=500, render=False</span>):
+    <span class="comment"># 存储每次评估的结果</span>
+    episode_rewards = []
+    episode_lengths = []
+    
+    <span class="keyword">for</span> episode <span class="keyword">in</span> range(episodes):
+        state = env.reset()
+        <span class="keyword">if</span> isinstance(state, tuple):
+            state = state[<span class="string">0</span>]
+        total_reward = <span class="string">0</span>
+        steps = <span class="string">0</span>
+        
+        <span class="keyword">while</span> steps < max_steps:
+            <span class="comment"># 使用贪婪策略选择动作（纯利用）</span>
+            action = agent.greedy_action(state)
+            next_state, reward, done, _, _ = env.step(action)
+            
+            <span class="keyword">if</span> render:
+                env.render()  <span class="comment"># 可视化评估过程</span>
+                
+            total_reward += reward
+            steps += <span class="string">1</span>
+            state = next_state
+            
+            <span class="keyword">if</span> done:
+                <span class="keyword">break</span>
+        
+        episode_rewards.append(total_reward)
+        episode_lengths.append(steps)
+        
+        <span class="comment"># 打印进度</span>
+        <span class="keyword">if</span> (episode + <span class="string">1</span>) % <span class="string">10</span> == <span class="string">0</span>:
+            print(f"Evaluation Episode {episode+1}/{episodes}, Reward: {total_reward}")
+    
+    <span class="keyword">return</span> {
+        <span class="string">'rewards'</span>: episode_rewards,
+        <span class="string">'lengths'</span>: episode_lengths,
+        <span class="string">'mean_reward'</span>: np.mean(episode_rewards),
+        <span class="string">'std_reward'</span>: np.std(episode_rewards),
+        <span class="string">'max_reward'</span>: np.max(episode_rewards),
+        <span class="string">'min_reward'</span>: np.min(episode_rewards)
+    }
+
+<span class="comment"># 结果可视化函数</span>
+<span class="keyword">def</span> <span class="function">visualize_results</span>(<span class="parameter">results</span>):
+    <span class="comment"># 创建一个2x2的图表</span>
+    fig, axes = plt.subplots(<span class="string">2</span>, <span class="string">2</span>, figsize=(<span class="string">12</span>, <span class="string">10</span>))
+    fig.suptitle(<span class="string">"Agent Evaluation Results"</span>, fontsize=<span class="string">16</span>)
+    
+    <span class="comment"># 1. 奖励序列图</span>
+    axes[<span class="string">0</span>, <span class="string">0</span>].plot(results[<span class="string">'rewards'</span>])
+    axes[<span class="string">0</span>, <span class="string">0</span>].axhline(results[<span class="string">'mean_reward'</span>], color=<span class="string">'r'</span>, linestyle=<span class="string">'--'</span>, label=f"Mean: {results['mean_reward']:.2f}")
+    axes[<span class="string">0</span>, <span class="string">0</span>].set_title(<span class="string

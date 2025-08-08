@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>知识补充 - MCP与RAG详解</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- 引入Chart.js注释插件 -->
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.umd.min.js"></script>
+    <script>
+        tailwind.config = {}
+    </script>
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .bg-gradient-primary {
+                background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            }
+            .transition-all-300 {
+                transition: all 300ms ease-in-out;
+            }
+        }
+    </style>
+</head>
+<body class="bg-light text-primary font-sans min-h-screen flex flex-col">
+    <!-- 返回首页链接 -->
+    <div class="fixed top-4 left-4 z-50 bg-white rounded-full shadow-md p-2 hover:shadow-lg transition-shadow">
+        <a href="index.html" class="flex items-center justify-center w-10 h-10 text-primary hover:text-secondary transition-colors">
+            <i class="fa fa-home text-lg"></i>
+        </a>
+    </div>
+
+    <!-- 英雄区域 -->
+    <section class="bg-gradient-primary text-white py-16 md:py-24">
+        <div class="container mx-auto px-4 text-center">
+            <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold mb-4 text-shadow">知识补充详解</h1>
+            <p class="text-[clamp(1rem,2vw,1.25rem)] max-w-3xl mx-auto opacity-90">探索MCP（多标准预测）与RAG（检索增强生成）的核心概念、原理、应用场景与前沿发展</p>
+        </div>
+    </section>
+
+    <!-- 主内容区域 -->
+    <main class="flex-grow container mx-auto px-4 py-12">
+        <!-- 侧边导航与内容容器 -->
+        <div class="flex flex-col lg:flex-row gap-8">
+            <!-- 侧边导航 -->
+            <aside class="lg:w-1/4 lg:sticky lg:top-24 h-fit bg-white rounded-xl shadow-md p-6 hidden lg:block">
+                <h3 class="text-lg font-bold mb-4 text-primary border-b border-gray-200 pb-2">目录</h3>
+                <nav class="space-y-3">
+                    <div>
+                        <h4 class="font-medium text-secondary mb-2">MCP（多标准预测）</h4>
+                        <ul class="space-y-2 pl-4">
+                            <li><a href="#mcp-basic" class="hover:text-accent transition-colors text-sm">基本概念</a></li>
+                            <li><a href="#mcp-principle" class="hover:text-accent transition-colors text-sm">原理</a></li>
+                            <li><a href="#mcp-applications" class="hover:text-accent transition-colors text-sm">应用场景</a></li>
+                            <li><a href="#mcp-advantages" class="hover:text-accent transition-colors text-sm">优势</a></li>
+                            <li><a href="#mcp-limitations" class="hover:text-accent transition-colors text-sm">局限性</a></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="font-medium text-secondary mb-2 mt-4">RAG（检索增强生成）</h4>
+                        <ul class="space-y-2 pl-4">
+                            <li><a href="#rag-basic" class="hover:text-accent transition-colors text-sm">基本概念</a></li>
+                            <li><a href="#rag-principle" class="hover:text-accent transition-colors text-sm">原理</a></li>
+                            <li><a href="#rag-applications" class="hover:text-accent transition-colors text-sm">应用场景</a></li>
+                            <li><a href="#rag-advantages" class="hover:text-accent transition-colors text-sm">优势</a></li>
+                            <li><a href="#rag-limitations" class="hover:text-accent transition-colors text-sm">局限性</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- 主要内容 -->
+            <div class="lg:w-3/4">
+                <!-- MCP部分 -->
+                <section id="mcp" class="mb-16">
+                    <div class="bg-white rounded-xl shadow-md p-8 mb-8 transform transition-all-300 hover:shadow-lg">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mr-4">
+                                <i class="fa fa-line-chart text-primary text-xl"></i>
+                            </div>
+                            <h2 class="text-2xl md:text-3xl font-bold text-primary">MCP（多标准预测）</h2>
+                        </div>
+
+                        <div id="mcp-basic" class="mb-8">
+                            <h3 class="text-xl font-semibold text-secondary mb-4 flex items-center">
+                                <i class="fa fa-info-circle mr-2"></i>基本概念
+                            </h3>
+                            <p class="text-gray-700 leading-relaxed mb-4">
+                                MCP即多标准预测，是一种综合考量多个标准或因素来开展预测的方法。它突破了单一因素预测的局限，致力于通过整合多方面的信息，为预测提供更全面的依据。
+                            </p>
+                            <div class="bg-accent/5 p-4 rounded-lg border-l-4 border-accent mt-4">
+                                <p class="text-sm text-gray-600 italic">
+                                    <strong>补充知识：</strong> MCP是决策科学和预测分析领域的重要方法，特别适用于复杂系统的预测问题，如气候变化的预测问题，金融市场波动和疾病传播等。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="mcp-principle" class="mb-8">
+                            <h3 class="text-xl font-semibold text-secondary mb-4 flex items-center">
+                                <i class="fa fa-cogs mr-2"></i>原理
+                            </h3>
+                            <p class="text-gray-700 leading-relaxed mb-4">
+                                MCP会收集多个相关变量的数据，运用复杂的数学模型和算法对这些数据进行分析和处理，以得出预测结果。常见的算法包括决策树算法和神经网络算法等。
+                            </p>
+
+                            <div class="grid md:grid-cols-2 gap-6 mt-6">
+                                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
+                                    <h4 class="font-medium text-primary mb-3 flex items-center">
+                                        <i class="fa fa-sitemap text-accent mr-2"></i>决策树算法
+                                    </h4>
+                                    <p class="text-gray-600 text-sm leading-relaxed">
+                                        通过对数据进行分层划分，根据不同特征的取值构建决策树结构，每个内部节点是一个属性上的测试，每个分支是一个测试输出，每个叶节点是一个类别或值。
+                                    </p>
+                                    <p class="text-gray-600 text-sm leading-relaxed mt-2">
+                                        例如，在预测股票价格走势时，可将公司财务状况、行业发展趋势、宏观经济指标等作为不同属性，通过决策树算法确定这些属性如何影响股票价格。
+                                    </p>
+                                </div>
+
+                                <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm hover:shadow-md transition-shadow">
+                                    <h4 class="font-medium text-primary mb-3 flex items-center">
+                                        <i class="fa fa-brain text-accent mr-2"></i>神经网络算法
+                                    </h4>
+                                    <p class="text-gray-600 text-sm leading-relaxed">
+                                        模仿人类神经系统的工作方式，由大量的神经元组成网络结构，通过对数据的学习和训练来调整神经元之间的连接权重，从而实现对复杂关系的建模。
+                                    </p>
+                                    <p class="text-gray-600 text-sm leading-relaxed mt-2">
+                                        在医疗领域预测疾病风险时，可将患者的基因信息、生活习惯、过往病史等数据输入神经网络，学习这些因素与疾病发生之间的关系。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- MCP工作流程图 -->
+                            <div class="mt-8 bg-white p-4 rounded-lg shadow-sm">
+                                <h4 class="text-center font-medium text-primary mb-4">MCP工作流程示意图</h4>
+                                <div class="h-64 relative overflow-hidden rounded-lg border border-gray-200">
+                                    <canvas id="mcpWorkflowChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="mcp-applications" class="mb-8">
+                            <h3 class="text-xl font-semibold text-secondary mb-4 flex items-center">
+                                <i class="fa fa-briefcase mr-2"></i>应用场景
+                            </h3>
+
+                            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                <div class="bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg p-6 border border-primary/20">
+                                    <h4 class="font-medium text-primary mb-3 flex items-center">
+                                        <i class="fa fa-chart-bar text-secondary mr-2"></i>金融领域
+                                    </h4>
+                                    <p class="text-gray-700 text-sm leading-relaxed">
+                                        可用于预测股票价格走势，综合考虑公司财务状况、发展趋势、宏观经济指标等多个因素。例如，分析科技公司股票时，需考虑营收、利润等财务指标，科技行业发展趋势，以及利率、通货膨胀率等宏观经济指标。
+                                    </p>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-secondary/5 to-secondary/10 rounded-lg p-6 border border-secondary/20">
+                                    <h4 class="font-medium text-primary mb-3 flex items-center">
+                                        <i class="fa fa-heartbeat text-secondary mr-2"></i>医疗领域
+                                    </h4>
+                                    <p class="text-gray-700 text-sm leading-relaxed">
+                                        可预测疾病的发生风险，结合患者的基因信息、生活习惯、过往病史等。例如，对于心血管疾病的预测，可收集患者基因数据、生活习惯（吸烟、饮酒、运动量）和过往病史（高血压、糖尿病）等因素。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 补充应用场景 -->
+                            <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm mt-4">
+                                <h4 class="font-medium text-primary mb-3">更多应用场景</h4>
+                                <ul class="space-y-2 text-gray-700 text-sm">
+                                    <li class="flex items-start">
+                                        <i class="fa fa-check-circle text-accent mt-1 mr-2"></i>
+                                        <span><strong>气象预测：</strong>结合温度、湿度、气压、风速等多维度数据预测天气变化</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa fa-check-circle text-accent mt-1 mr-2"></i>
+                                        <span><strong>交通流量预测：</strong>考虑道路状况、时间、天气、事件等因素预测交通拥堵情况</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa fa-check-circle text-accent mt-1 mr-2"></i>
+                                        <span><strong>能源需求预测：</strong>综合经济指标、天气、季节变化等预测电力或水资源需求</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div id="mcp-advantages" class="mb-8">
+                            <h3 class="text-xl font-semibold text-secondary mb-4 flex items-center">
+                                <i class="fa fa-thumbs-up mr-2"></i>优势
+                            </h3>
+                            <p class="text-gray-700 leading-relaxed mb-4">
+                                能更全面、综合地考虑多种因素，使得预测结果更精准、可靠。相较于只考虑单一因素的预测方法，MCP能够捕捉到不同因素之间的复杂交互作用，从而提供更准确的预测。
+                            </p>
+                            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg mt-4">
+                                <p class="text-sm text-gray-700">
+                                    <strong>实例：</strong> 在股票价格预测中，单一因素可能只能反映股票价格的部分影响因素，而MCP综合考虑多个因素后，可以更全面地分析股票价格的走势，为投资者提供更可靠的决策依据。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="mcp-limitations" class="mb-4">
+                            <h3 class="text-xl font-semibold text-secondary mb-4 flex items-center">
+                                <i class="fa fa-exclamation-triangle mr-2"></i>局限性
+                            </h3>
+
+                            <div class="space-y-4">
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <h4 class="font-medium text-primary mb-2 flex items-center">
+                                        <i class="fa fa-database text-red-400 mr-2"></i>数据和计算资源需求大
+                                    </h4>
+                                    <p class="text-gray-600 text-sm leading-relaxed">
+                                        MCP需要大量的数据来训练和优化模型，同时复杂的数学模型和算法在运行过程中需要强大的计算资源支持。例如，构建全球气候变化的预测模型需要海量气象、海洋、生态数据和高性能计算机集群。
+                                    </p>
+                                </div>
+
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <h4 class="font-medium text-primary mb-2 flex items-center">
+                                        <i class="fa fa-money-bill-wave text-red-400 mr-2"></i>数据收集和处理成本高
+                                    </h4>
+                                    <p class="text-gray-600 text-sm leading-relaxed">
+                                        为了获取全面的相关数据，需要投入大量的人力、物力和财力。例如，医疗领域收集患者基因信息需要专业设备、技术人员和较高的测序成本，数据清洗和预处理也耗时耗力。
+                                    </p>
+                                </div>
+
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <h4 class="font-medium text-primary mb-2 flex items-center">
+                                        <i class="fa fa-question-circle text-red-400 mr-2"></i>模型解释性较差
+                                    </h4>
+                                    <p class="text-gray-600 text-sm leading-relaxed">
+                                        由于模型的复杂性，很难直观地解释模型是如何根据输入数据得出预测结果的。例如，神经网络模型中神经元之间的连接权重和复杂网络结构使得难以理解每个输入因素对输出结果的具体影响程度。
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- RAG部分 -->
+                <section id="rag">
+                    <div class="bg-white rounded-xl shadow-md p-8 transform transition-all-300 hover:shadow-lg">
+                        <div class="flex items-center mb-6">
+                            <div class="w-12 h-12 rounded-full bg-secondary/10 flex items-center justify-center mr-4">
+                                <i class="fa fa-search-plus text-secondary text-xl"></i>
+                            </div>
+                            <h2 class="text-2xl md:text-3xl font-bold text-primary">RAG（检索增强生成）</h2>
+                        </div>
+
+                        <div id="rag-basic" class="mb-8">
+                            <h3 class="text-xl font-semibold text-secondary mb-4 flex items-center">
+                                <i class="fa fa-info-circle mr-2"></i>基本概念
+                            </h3>
+                            <p class="text-gray-700 leading-relaxed mb-4">
+                                RAG也就是检索增强生成，它是在生成式模型的基础上，增加了检索机制，旨在利用外部知识来提升生成内容的质量。
+                            </p>
+                            <div class="bg-accent/5 p-4 rounded-lg border-l-4 border-accent mt-4">
+                                <p class="text-sm text-gray-600 italic">
+                                    <strong>补充知识：</strong> RAG是解决大语言模型幻觉问题的有效方法之一，通过引入外部知识库，使模型能够生成更准确、更可靠的内容，尤其适用于需要最新信息或专业知识的场景。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="rag-principle" class="mb-8">
+                            <h3 class="text-xl font-semibold text-secondary mb-4 flex items-center">
+                                <i class="fa fa-cogs mr-2"></i>原理
+                            </h3>
+                            <p class="text-gray-700 leading-relaxed mb-4">
+                                当模型接收到输入时，首先会从外部知识库或语料库中检索相关信息，然后将这些检索到的信息与输入结合，再由生成式模型生成相应的输出。
+                            </p>
+
+                            <!-- RAG工作流程图 -->
+                            <div class="mt-6 bg-white p-4 rounded-lg shadow-sm mb-6">
+                                <h4 class="text-center font-medium text-primary mb-4">RAG工作流程示意图</h4>
+                                <div class="h-64 relative overflow-hidden rounded-lg border border-gray-200">
+                                    <canvas id="ragWorkflowChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="bg-white border border-gray-200 rounded-lg p-5 shadow-sm">
+                                <p class="text-gray-700 text-sm leading-relaxed">
+                                    <strong>实例：</strong> 当用户向智能客服系统提出一个问题时，系统会先在其知识库中搜索与该问题相关的答案信息，然后将这些信息与用户的问题一起输入到生成式模型中，由模型生成最终的回答内容。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="rag-applications" class="mb-8">
+                            <h3 class="text-xl font-semibold text-secondary mb-4 flex items-center">
+                                <i class="fa fa-briefcase mr-2"></i>应用场景
+                            </h3>
+
+                            <div class="grid md:grid-cols-2 gap-6 mb-6">
+                                <div class="bg-gradient-to-br from-secondary/5 to-secondary/10 rounded-lg p-6 border border-secondary/20">
+                                    <h4 class="font-medium text-primary mb-3 flex items-center">
+                                        <i class="fa fa-headset text-secondary mr-2"></i>智能客服系统
+                                    </h4>
+                                    <p class="text-gray-700 text-sm leading-relaxed">
+                                        当客户提出问题时，系统会先从知识库中检索相关的答案信息，然后生成回答内容。例如，在电商平台的智能客服中，当客户询问商品规格、售后政策等问题时，客服系统会从商品知识库中检索相关信息，生成准确、详细的回答。
+                                    </p>
+                                </div>
+
+                                <div class="bg-gradient-to-br from-accent/5 to-accent/10 rounded-lg p-6 border border-accent/20">
+                                    <h4 class="font-medium text-primary mb-3 flex items-center">
+                                        <i class="fa fa-pen-fancy text-accent mr-2"></i>内容创作领域
+                                    </h4>
+                                    <p class="text-gray-700 text-sm leading-relaxed">
+                                        它可以检索相关的素材和知识，辅助创作者生成文章、故事等。例如，作家在创作历史事件小说时，RAG系统可以从历史知识库中检索事件背景信息、相关人物资料等，为作家提供创作素材和灵感，帮助构建更丰富、准确的故事情节。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 补充应用场景 -->
+                            <div class="bg-white rounded-lg p-4 border border-gray-200 shadow-sm mt-4">
+                                <h4 class="font-medium text-primary mb-3">更多应用场景</h4>
+                                <ul class="space-y-2 text-gray-700 text-sm">
+                                    <li class="flex items-start">
+                                        <i class="fa fa-check-circle text-accent mt-1 mr-2"></i>
+                                        <span><strong>教育领域：</strong>检索教学资料和知识点，为学生提供个性化学习内容和解答</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa fa-check-circle text-accent mt-1 mr-2"></i>
+                                        <span><strong>法律行业：</strong>检索法律法规和案例，辅助律师进行法律研究和咨询</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa fa-check-circle text-accent mt-1 mr-2"></i>
+                                        <span><strong>科研领域：</strong>检索学术文献和研究成果，辅助研究人员开展文献综述和新研究</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div id="rag-advantages" class="mb-8">
+                            <h3 class="text-xl font-semibold text-secondary mb-4 flex items-center">
+                                <i class="fa fa-thumbs-up mr-2"></i>优势
+                            </h3>
+                            <p class="text-gray-700 leading-relaxed mb-4">
+                                能够利用外部知识来提升生成内容的准确性和相关性，避免生成式模型产生无意义或错误的信息。传统的生成式模型可能会因为缺乏外部知识的支持而生成一些不准确或与实际情况不符的内容，而RAG通过检索外部知识库中的信息，可以为生成过程提供更可靠的依据。
+                            </p>
+                            <div class="bg-green-50 border-l-4 border-green-400 p-4 rounded-r-lg mt-4">
+                                <p class="text-sm text-gray-700">
+                                    <strong>实例：</strong> 在生成科学研究新闻报道时，RAG可以从科学文献数据库中检索相关的研究成果和数据，使得报道内容更准确、客观。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div id="rag-limitations" class="mb-4">
+                            <h3 class="text-xl font-semibold text-secondary mb-4 flex items-center">
+                                <i class="fa fa-exclamation-triangle mr-2"></i>局限性
+                            </h3>
+
+                            <div class="space-y-4">
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <h4 class="font-medium text-primary mb-2 flex items-center">
+                                        <i class="fa fa-book text-red-400 mr-2"></i>检索准确性依赖于知识库质量
+                                    </h4>
+                                    <p class="text-gray-600 text-sm leading-relaxed">
+                                        如果知识库不完善，包含的信息不全面或不准确，那么检索到的信息也会存在问题，从而影响最终的生成结果。例如，智能医疗咨询系统中，如果知识库中关于罕见疾病的信息不完整，当用户询问该疾病相关问题时，系统可能无法检索到准确信息，导致回答不准确。
+                                    </p>
+                                </div>
+
+                                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                                    <h4 class="font-medium text-primary mb-2 flex items-center">
+                                        <i class="fa fa-search text-red-400 mr-2"></i>检索算法性能影响结果
+                                    </h4>
+                                    <p class="text-gray-600 text-sm leading-relaxed">
+                                        检索算法的性能直接影响到能否快速、准确地从知识库中找到相关信息。如果检索算法不佳，可能会出现检索结果不准确、检索速度慢等问题。例如，在大型企业知识库中，如果检索算法不能有效索引和匹配文档，用户搜索特定信息时可能会得到大量无关结果或需要很长时间才能得到结果。
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- 补充局限性 -->
+                            <div class="bg-orange-50 p-4 rounded-lg border-l-4 border-orange-400 mt-4">
+                                <h4 class="font-medium text-primary mb-2">额外挑战</h4>
+                                <ul class="space-y-2 text-gray-700 text-sm">
+                                    <li class="flex items-start">
+                                        <i class="fa fa-chevron-right text-orange-400 mt-1 mr-2"></i>
+                                        <span><strong>知识更新：</strong>外部知识库需要持续更新以保持信息的时效性</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa fa-chevron-right text-orange-400 mt-1 mr-2"></i>
+                                        <span><strong>计算开销：</strong>额外的检索步骤增加了系统的计算开销和响应时间</span>
+                                    </li>
+                                    <li class="flex items-start">
+                                        <i class="fa fa-chevron-right text-orange-400 mt-1 mr-2"></i>
+                                        <span><strong>多语言支持：</strong>在多语言环境中，检索和生成的准确性面临更大挑战</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- MCP与RAG对比部分 -->
+                <section class="mt-12">
+                    <div class="bg-white rounded-xl shadow-md p-8 transform transition-all-300 hover:shadow-lg">
+                        <h2 class="text-2xl font-bold text-primary mb-6 flex items-center">
+                            <i class="fa fa-balance-scale text-accent mr-3"></i>MCP与RAG的对比分析
+                        </h2>
+                        <div class="overflow-x-auto">
+                            <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                                <thead class="bg-primary text-white">
+                                    <tr>
+                                        <th class="py-3 px-4 text-left font-semibold">对比维度</th>
+                                        <th class="py-3 px-4 text-left font-semibold">MCP（多标准预测）</th>
+                                        <th class="py-3 px-4 text-left font-semibold">RAG（检索增强生成）</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="py-3 px-4 font-medium text-gray-700">核心目标</td>
+                                        <td class="py-3 px-4 text-gray-600">通过整合多因素提高预测准确性</td>
+                                        <td class="py-3 px-4 text-gray-600">通过外部知识增强生成内容质量</td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="py-3 px-4 font-medium text-gray-700">技术基础</td>
+                                        <td class="py-3 px-4 text-gray-600">决策树、神经网络等机器学习算法</td>
+                                        <td class="py-3 px-4 text-gray-600">检索系统 + 生成式语言模型</td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="py-3 px-4 font-medium text-gray-700">数据需求</td>
+                                        <td class="py-3 px-4 text-gray-600">需要大量训练数据，覆盖多个维度</td>
+                                        <td class="py-3 px-4 text-gray-600">需要高质量的外部知识库</td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="py-3 px-4 font-medium text-gray-700">应用场景</td>
+                                        <td class="py-3 px-4 text-gray-600">预测分析（金融、医疗、气象等）</td>
+                                        <td class="py-3 px-4 text-gray-600">问答系统、内容创作、教育等</td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="py-3 px-4 font-medium text-gray-700">主要优势</td>
+                                        <td class="py-3 px-4 text-gray-600">综合多因素，预测更精准</td>
+                                        <td class="py-3 px-4 text-gray-600">知识更新灵活，生成内容更准确</td>
+                                    </tr>
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="py-3 px-4 font-medium text-gray-700">主要挑战</td>
+                                        <td class="py-3 px-4 text-gray-600">数据和计算资源需求大，解释性差</td>
+                                        <td class="py-3 px-4 text-gray-600">依赖知识库质量，检索算法性能</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-primary text-white py-8 mt-12">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-4 md:mb-0">
+                    <div class="flex items-center space-x-2 mb-2">
+                        <i class="fa fa-book text-secondary text-xl"></i>
+                        <h2 class="text-xl font-bold">AI知识图谱</h2>
+                    </div>
+                    <p class="text-gray-300 text-sm">探索人工智能的无限可能</p>
+                </div>
+                <div class="flex space-x-4">
+                    <a href="#" class="text-gray-300 hover:text-secondary transition-colors">
+                        <i class="fa fa-github text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-300 hover:text-secondary transition-colors">
+                        <i class="fa fa-twitter text-xl"></i>
+                    </a>
+                    <a href="#" class="text-gray-300 hover:text-secondary transition-colors">
+                        <i class="fa fa-linkedin text-xl"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="border-t border-gray-700 mt-6 pt-6 text-center text-gray-400 text-sm">
+                <p>&copy; 2023 AI知识图谱. 保留所有权利.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript -->
+    <script>
+        // 移动端菜单切换
+        document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+            const mobileMenu = document.getElementById('mobile-menu');
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // 滚动时导航栏样式变化
+        window.addEventListener('scroll', function() {
+            const header = document.querySelector('header');
+            if (window.scrollY > 50) {
+                header.classList.add('py-2', 'bg-primary-dark');
+                header.classList.remove('py-3');
+            } else {
+                header.classList.add('py-3');
+                header.classList.remove('py-2', 'bg-primary-dark');
+            }
+        });
+
+        // MCP工作流程图表
+        document.addEventListener('DOMContentLoaded', function() {
+            // MCP工作流程图 - 使用水平条形图展示工作流程
+            const mcpCtx = document.getElementById('mcpWorkflowChart').getContext('2d');
+            new Chart(mcpCtx, {
+                type: 'bar',
+                data: {
+                    labels: ['数据收集', '特征工程', '模型训练', '多因素融合', '预测输出', '结果评估'],
+                    datasets: [{
+                        label: 'MCP工作流程',
+                        data: [1, 2, 3, 4, 5, 6],
+                        backgroundColor: [
+                            'rgba(44, 62, 80, 0.7)',
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(99, 102, 241, 0.7)',
+                            'rgba(52, 152, 219, 0.7)',
+                            'rgba(44, 62, 80, 0.7)',
+                            'rgba(99, 102, 241, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(44, 62, 80)',
+                            'rgb(52, 152, 219)',
+                            'rgb(99, 102, 241)',
+                            'rgb(52, 152, 219)',
+                            'rgb(44, 62, 80)',
+                            'rgb(99, 102, 241)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    indexAxis: 'y', // 水平条形图
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            display: false
+                        },
+                        y: {
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const steps = [
+                                        '收集多维度数据',
+                                        '提取和处理特征',
+                                        '训练预测模型',
+                                        '融合多种预测标准',
+                                        '生成预测结果',
+                                        '评估预测准确性'
+                                    ];
+                                    return steps[context.dataIndex];
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+
+            // RAG工作流程图 - 使用有向折线图展示信息流动
+            const ragCtx = document.getElementById('ragWorkflowChart').getContext('2d');
+            new Chart(ragCtx, {
+                type: 'line',
+                data: {
+                    labels: ['用户输入', '信息检索', '知识融合', '内容生成', '输出结果'],
+                    datasets: [{
+                        label: 'RAG工作流程',
+                        data: [0, 40, 60, 80, 100],
+                        fill: false,
+                        backgroundColor: 'rgb(52, 152, 219)',
+                        borderColor: 'rgb(52, 152, 219)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        pointBackgroundColor: [
+                            'rgb(44, 62, 80)',
+                            'rgb(52, 152, 219)',
+                            'rgb(99, 102, 241)',
+                            'rgb(52, 152, 219)',
+                            'rgb(44, 62, 80)'
+                        ],
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100,
+                            display: false
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const steps = [
+                                        '接收用户查询',
+                                        '从知识库检索相关信息',
+                                        '将检索到的知识与输入融合',
+                                        '基于融合信息生成内容',
+                                        '输出最终结果'
+                                    ];
+                                    return steps[context.dataIndex];
+                                }
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeOutQuart'
+                    }
+                }
+            });
+        });
+    </script>
+</body>
+</html>
